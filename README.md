@@ -4,7 +4,15 @@
 **MedQ Local** is a client-side web application designed for building, managing, and practicing custom question banks completely offline. Built with zero external library dependencies, it runs directly inside any modern web browser, keeping your study data private and fast.
 
 ---
+## 🚀 Getting Started
 
+Because **MedQ Local** is packaged as a single standalone application, setup is instant:
+
+1. **Clone or Download** this repository.
+2. **Open `MedQ_V1.html`** in any modern web browser (e.g., Chrome, Edge, Brave).
+3. **Start practicing** immediately using the built-in sample questions or import your own datasets.
+
+---
 ## 🌟 Key Features
 
 * **100% Offline & Private**: All study records, questions, bookmarks, and settings stay on your machine without transmitting data across the internet.
