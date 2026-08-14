@@ -1,8 +1,4 @@
-Here is the clean, final version of your **`README.md`** file, completely free of citation tags and formatted for immediate copy-pasting into your repository.
 
----
-
-```markdown
 # MedQ Local — Offline Question Bank
 
 **MedQ Local** is a client-side web application designed for building, managing, and practicing custom question banks completely offline. Built with zero external library dependencies, it runs directly inside any modern web browser, keeping your study data private and fast.
