@@ -83,5 +83,3 @@ Separate individual questions using `---` dividers and key markers like `# Q001`
 This project is licensed under a **Personal & Non-Commercial Use License** — free to use, modify, and study for individual non-commercial purposes. Commercial use and public redistribution are strictly prohibited. See the [LICENSE] file for details.
 
 ```
-
-```
