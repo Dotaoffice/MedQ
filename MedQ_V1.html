@@ -1,0 +1,2712 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MedQ Local — Offline Question Bank</title>
+  <style>
+:root {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --text: #152033;
+  --muted: #68758a;
+  --line: #dfe5ee;
+  --primary: #3b5ccc;
+  --primary-dark: #2c48ab;
+  --soft: #eef2ff;
+  --success: #16805c;
+  --success-bg: #eaf8f2;
+  --danger: #c24040;
+  --danger-bg: #fff0f0;
+  --warning: #9a6715;
+  --shadow: 0 10px 30px rgba(31, 45, 70, .08);
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+code, pre { font-family: "SFMono-Regular", Consolas, monospace; }
+.app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar { position: sticky; top: 0; height: 100vh; padding: 24px 18px; background: #10182b; color: #fff; display: flex; flex-direction: column; }
+.brand { display: flex; gap: 12px; align-items: center; padding: 0 8px 24px; }
+.brand-mark { width: 42px; height: 42px; border-radius: 12px; background: #6e86ee; display: grid; place-items: center; font-weight: 800; }
+.brand h1 { margin: 0; font-size: 17px; }
+.brand p { margin: 4px 0 0; color: #aeb8cd; font-size: 12px; }
+.nav-list { display: flex; flex-direction: column; gap: 6px; }
+.nav-item { border: 0; background: transparent; color: #c9d2e3; text-align: left; padding: 12px 14px; border-radius: 10px; }
+.nav-item:hover, .nav-item.active { background: #202b43; color: #fff; }
+.sidebar-footer { margin-top: auto; color: #8f9cb5; font-size: 12px; padding: 12px 8px; }
+.main-content { min-width: 0; padding: 30px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.topbar h2 { margin: 0; font-size: 28px; }
+.topbar p { margin: 6px 0 0; color: var(--muted); }
+.view { display: none; }
+.view.active { display: block; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
+.stat-card, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.stat-card { padding: 20px; }
+.stat-card span, .stat-card small { display: block; color: var(--muted); }
+.stat-card strong { display: block; font-size: 30px; margin: 10px 0 4px; }
+.panel { padding: 22px; margin-bottom: 18px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.panel-head h3 { margin: 0; font-size: 19px; }
+.panel-head p { margin: 5px 0 0; color: var(--muted); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.narrow-panel { max-width: 680px; }
+.btn { border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; font-weight: 700; transition: .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: #fff; border-color: var(--line); color: var(--text); }
+.btn-ghost { background: transparent; color: var(--primary); }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border-color: #f3caca; }
+.btn-large { min-height: 48px; }
+.inline-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.center { justify-content: center; }
+.hidden { display: none !important; }
+.empty-state { color: var(--muted); padding: 24px 4px; }
+.drop-zone { border: 2px dashed #bdc8da; border-radius: 14px; padding: 38px 20px; text-align: center; background: #fafbfe; }
+.drop-zone.dragover { border-color: var(--primary); background: var(--soft); }
+.drop-zone h4 { margin: 8px 0; }
+.drop-zone p { color: var(--muted); }
+.drop-icon { font-size: 34px; color: var(--primary); }
+.help-copy { padding: 16px; }
+.help-copy h4 { margin: 18px 0 8px; }
+.help-copy h4:first-child { margin-top: 0; }
+.help-copy p { color: var(--muted); line-height: 1.6; margin: 0 0 14px; overflow-wrap: anywhere; word-break: break-word; }
+.help-copy code { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+pre { padding: 14px; border-radius: 10px; background: #111827; color: #e5ebf5; overflow: auto; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+pre code { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+.preview-list, .stack-list { display: flex; flex-direction: column; gap: 12px; }
+.preview-item, .list-item { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fff; }
+.preview-item h4, .list-item h4 { margin: 0 0 8px; }
+.preview-item p, .list-item p { margin: 6px 0; color: var(--muted); line-height: 1.55; }
+.alert { padding: 12px 14px; border-radius: 10px; background: #fff6de; color: var(--warning); margin-bottom: 14px; border: 1px solid #f0dfae; }
+.form-grid { display: grid; gap: 16px; }
+.form-grid label { display: grid; gap: 7px; font-weight: 700; }
+.form-grid input, .form-grid select, .compact-input { border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; background: #fff; color: var(--text); }
+.check-row { display: flex !important; align-items: center; gap: 10px !important; font-weight: 600 !important; }
+.quiz-topline { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; margin-bottom: 14px; }
+.progress { height: 8px; background: #e4e9f3; border-radius: 99px; margin-top: 9px; overflow: hidden; }
+.progress span { display: block; height: 100%; width: 0%; background: var(--primary); }
+.timer-box { background: #10182b; color: #fff; border-radius: 12px; padding: 10px 16px; min-width: 140px; text-align: center; }
+.timer-box span { display: block; color: #aab6cb; font-size: 12px; }
+.timer-box strong { font-size: 22px; }
+.quiz-panel { max-width: 900px; margin: 0 auto; }
+.question-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chip-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.chip { display: inline-flex; border-radius: 999px; padding: 5px 9px; background: var(--soft); color: var(--primary-dark); font-size: 12px; font-weight: 700; }
+.question-text { font-size: 24px; line-height: 1.5; margin: 18px 0 20px; white-space: pre-wrap; }
+.option-list { display: grid; gap: 12px; }
+.option-button { width: 100%; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: #fff; text-align: left; color: var(--text); }
+.option-button:hover { border-color: #9eafe9; background: #fafbff; }
+.option-button.selected { border-color: var(--primary); background: var(--soft); }
+.option-button.correct { border-color: var(--success); background: var(--success-bg); }
+.option-button.wrong { border-color: var(--danger); background: var(--danger-bg); }
+.option-key { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: #eef1f7; font-weight: 800; }
+.feedback { margin-top: 18px; padding: 18px; border-radius: 12px; border: 1px solid var(--line); }
+.feedback.correct { background: var(--success-bg); border-color: #b8e8d5; }
+.feedback.wrong { background: var(--danger-bg); border-color: #efc5c5; }
+.feedback h4 { margin: 0 0 10px; }
+.feedback p { line-height: 1.65; white-space: pre-wrap; }
+.quiz-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
+.result-hero { text-align: center; padding: 34px; }
+.eyebrow { color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .12em; }
+.result-hero h3 { font-size: 30px; margin: 10px 0 22px; }
+.result-grid { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 620px; margin: 0 auto 24px; }
+.result-grid > div { padding: 15px; border-right: 1px solid var(--line); }
+.result-grid > div:last-child { border-right: 0; }
+.result-grid span { display: block; color: var(--muted); }
+.result-grid strong { display: block; font-size: 24px; margin-top: 6px; }
+.analytics-list { display: grid; gap: 14px; }
+.analytics-row { display: grid; grid-template-columns: minmax(100px, 1fr) 2fr auto; gap: 12px; align-items: center; }
+.analytics-row .bar { height: 9px; background: #e9edf5; border-radius: 99px; overflow: hidden; }
+.analytics-row .bar span { display: block; height: 100%; background: var(--primary); }
+.segmented { display: inline-flex; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: #f8f9fc; }
+.segment { border: 0; background: transparent; border-radius: 7px; padding: 7px 11px; color: var(--muted); }
+.segment.active { background: #fff; color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.item-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.item-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+.badge-success { background: var(--success-bg); color: var(--success); }
+.toast { position: fixed; right: 24px; bottom: 24px; background: #111827; color: #fff; padding: 12px 16px; border-radius: 10px; box-shadow: var(--shadow); z-index: 20; }
+@media (max-width: 1000px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; padding: 16px; }
+  .nav-list { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .sidebar-footer { display: none; }
+  .main-content { padding: 18px; }
+  .topbar { align-items: flex-start; }
+  .topbar-actions { display: none; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .quiz-actions { align-items: stretch; flex-direction: column-reverse; }
+  .quiz-actions .inline-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .result-grid { grid-template-columns: 1fr; }
+  .result-grid > div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .result-grid > div:last-child { border-bottom: 0; }
+  .panel-head { align-items: flex-start; flex-direction: column; }
+  .analytics-row { grid-template-columns: 1fr; }
+}
+
+
+/* Subject-first question-bank dashboard */
+:root {
+  --sidebar: #2e4457;
+  --sidebar-dark: #263a4b;
+  --aqua: #28cdb5;
+  --blue-soft: #dceeff;
+  --green-soft: #dfffc2;
+  --red-soft: #ffe1e1;
+}
+.app-shell { grid-template-columns: 266px 1fr; }
+.sidebar { padding: 0; background: var(--sidebar); }
+.brand { padding: 19px 20px; background: var(--sidebar-dark); min-height: 86px; }
+.brand-mark { background: transparent; width: 36px; height: 42px; border-radius: 0; display:flex; align-items:flex-end; justify-content:center; gap:3px; }
+.brand-mark i { display:block; width:7px; border-radius:1px 1px 0 0; }
+.brand-mark i:nth-child(1){height:14px;background:#ff2739}.brand-mark i:nth-child(2){height:23px;background:#ffd51f}.brand-mark i:nth-child(3){height:32px;background:#75ff00}
+.brand h1 { font-size: 20px; font-weight: 500; }
+.brand p { color:#cbd6df; }
+.nav-list { padding: 14px 10px; gap: 2px; }
+.nav-section-label { color:#91a5b5; font-size:11px; text-transform:uppercase; padding:14px 10px 6px; letter-spacing:.04em; }
+.nav-item { color:#eef3f6; border-radius:6px; padding:10px 10px; display:flex; align-items:center; gap:10px; }
+.nav-item:hover,.nav-item.active { background:#3b5367; }
+.nav-icon { width:18px; text-align:center; opacity:.9; }
+.sidebar-footer { padding: 16px 20px; }
+.main-content { padding: 20px 22px 36px; background:#f7f7f7; }
+.topbar { margin:0 0 18px; background:white; border:1px solid #d7d7d7; border-radius:5px; padding:18px 20px; box-shadow:0 3px 10px rgba(0,0,0,.05); }
+.topbar h2 { font-size:23px; font-weight:500; }
+.topbar p { margin-top:4px; }
+.panel, .stat-card { border-radius:6px; border-color:#d1d1d1; box-shadow:0 4px 12px rgba(0,0,0,.06); }
+.panel { padding:0; overflow:hidden; }
+.panel-head { margin:0; min-height:39px; padding:9px 16px; border-bottom:1px solid #cfcfcf; background:#fbfbfb; }
+.panel-head h3 { font-size:16px; font-weight:500; text-transform:uppercase; letter-spacing:.01em; }
+.panel-body { padding:16px; }
+.file-storage-status { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:14px 16px; border:1px solid #cfd8e3; border-radius:7px; background:#f6f9fc; margin:16px; }
+.file-storage-status strong { display:block; margin-bottom:4px; }
+.file-storage-status p { margin:0; color:var(--muted); line-height:1.5; overflow-wrap:anywhere; }
+.file-storage-status.connected { border-color:#9dd9c8; background:#effbf6; }
+.file-storage-status.warning { border-color:#efcf83; background:#fff9e8; }
+.storage-note { font-size:13px; color:var(--muted); line-height:1.5; }
+@media (max-width:760px) { .file-storage-status { flex-direction:column; } }
+/* Shared panel spacing: every normal content block receives safe inner margins. */
+.panel > .panel-head ~ :not(.panel-body):not(.category-list):not(.recent-list):not(.help-copy) {
+  margin-left:16px;
+  margin-right:16px;
+}
+.panel > .panel-head + :not(.panel-body):not(.category-list):not(.recent-list):not(.help-copy) {
+  margin-top:16px;
+}
+.panel > .panel-head ~ :last-child:not(.panel-body):not(.category-list):not(.recent-list):not(.help-copy) {
+  margin-bottom:16px;
+}
+.panel > .panel-head ~ .inline-actions { padding-top:2px; }
+.panel > .panel-head ~ p { line-height:1.55; overflow-wrap:anywhere; }
+.panel.quiz-panel { padding:22px; }
+.panel.result-hero { padding:34px; }
+.panel.result-hero .inline-actions { margin-bottom:0; }
+.panel.narrow-panel { overflow:visible; }
+.panel.narrow-panel > .form-grid { margin-bottom:16px; }
+.panel .empty-state { min-height:72px; }
+.panel .stack-list { min-width:0; }
+.panel .list-item, .panel .preview-item { overflow-wrap:anywhere; }
+.compact-input { min-width:0; max-width:100%; }
+@media (max-width:760px) {
+  .panel.quiz-panel { padding:16px; }
+  .panel.result-hero { padding:24px 16px; }
+}
+.btn { border-radius:6px; font-weight:500; }
+.btn-primary { color:#1d3040; background:#cfe3ff; border-color:#c4dcfb; }
+.btn-primary:hover { color:#10283d; background:#bcd8ff; }
+.btn-secondary { background:#fff; }
+.bank-summary { background:white; border:1px solid #d7d7d7; border-radius:5px; padding:18px 20px; margin-bottom:16px; }
+.overall-progress { height:16px; background:#e9edf0; border-radius:10px; overflow:hidden; display:flex; max-width:845px; }
+.overall-progress .correct { background:var(--aqua); }
+.overall-progress .wrong { background:#ff6464; }
+.summary-copy { margin:15px 0 0; font-size:16px; }
+.summary-copy strong { font-weight:700; }
+.bank-actionbar { background:white; border:1px solid #d0d0d0; border-radius:5px; padding:18px; display:flex; align-items:center; justify-content:center; gap:22px; margin-bottom:16px; box-shadow:0 3px 9px rgba(0,0,0,.06); }
+.found-count { border:1px solid #ababab; border-radius:3px; padding:7px 9px; background:#f4f4f4; font-size:16px; min-width:180px; text-align:center; }
+.bank-action-controls { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.bank-action-controls input,.bank-action-controls select { border:1px solid #cfd4d8; padding:9px 10px; border-radius:5px; background:white; }
+.bank-layout { display:grid; grid-template-columns:minmax(480px,1.45fr) minmax(330px,1fr); gap:18px; }
+.category-list { padding:16px; }
+.category-row { display:grid; grid-template-columns:27px minmax(160px,1fr) minmax(120px,1.25fr) auto; align-items:center; min-height:44px; border:1px solid #dce1e5; border-bottom:0; padding:0 10px; background:white; position:relative; }
+.category-row:last-child { border-bottom:1px solid #dce1e5; border-radius:0 0 5px 5px; }
+.category-row:first-child { border-radius:5px 5px 0 0; }
+.category-row:hover { background:#fafcff; }
+.category-row.all-row { font-weight:600; background:#fbfcfd; }
+.category-check { width:17px; height:17px; accent-color:#147cff; }
+.category-name { display:flex; align-items:center; gap:9px; min-width:0; }
+.category-name span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.expand-subject { width:19px; height:19px; border:1px solid #1682ff; color:#1682ff; background:white; padding:0; line-height:15px; border-radius:2px; font-weight:700; }
+.subject-progress { height:30px; display:flex; align-items:center; position:relative; min-width:90px; }
+.subject-progress-track { height:100%; width:100%; display:flex; background:transparent; overflow:hidden; }
+.subject-progress-track .good { background:var(--green-soft); }
+.subject-progress-track .bad { background:var(--red-soft); }
+.subject-progress-label { position:absolute; right:8px; font-size:12px; background:rgba(255,255,255,.86); border-radius:12px; padding:2px 7px; white-space:nowrap; }
+.category-count { font-size:12px; white-space:nowrap; margin-left:9px; }
+.tag-subrows { border-left:3px solid #d8e8f7; }
+.tag-row { display:grid; grid-template-columns:27px minmax(0,1fr) auto; gap:8px; align-items:center; min-height:42px; padding:0 16px 0 34px; border:1px solid #e6e9ec; border-bottom:0; background:#fafafa; color:#53616c; font-size:13px; }
+.tag-row:last-child { border-bottom:1px solid #e6e9ec; }
+.tag-row:hover { background:#f3f8fc; }
+.tag-row label { min-width:0; overflow-wrap:anywhere; cursor:pointer; }
+.tag-checkbox { width:17px; height:17px; accent-color:#147cff; cursor:pointer; }
+.subject-tools { margin:14px 16px 0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.subject-tools input { flex:1 1 220px; min-width:160px; border:1px solid #cfd4d8; border-radius:6px; padding:8px 10px; font:inherit; background:#fff; }
+.subject-tools .btn { padding:8px 10px; font-size:13px; }
+.panel-head .subject-edit-button { padding:7px 11px; font-size:13px; text-transform:none; letter-spacing:0; }
+.row-mini-btn { border:0; background:transparent; color:#1769c2; padding:3px 5px; border-radius:4px; font:inherit; font-size:11px; cursor:pointer; white-space:nowrap; }
+.row-mini-btn:hover { background:#eaf3ff; }
+.category-name .row-mini-btn { margin-left:auto; }
+.tag-row { grid-template-columns:27px minmax(0,1fr) auto auto; }
+.subject-manager-summary { padding:0; display:grid; gap:12px; }
+.subject-manager-card { border:1px solid #dfe5ee; border-radius:10px; padding:15px; background:#fff; }
+.subject-manager-card h4 { margin:0 0 6px; }
+.subject-manager-card p { margin:0 0 14px; color:#68758a; line-height:1.45; }
+.subject-manager-row { display:grid; grid-template-columns:minmax(160px,1fr) minmax(180px,1.2fr) auto; gap:10px; align-items:end; }
+.subject-manager-row label { display:grid; gap:6px; font-weight:650; }
+.subject-manager-row input,.subject-manager-row select { width:100%; border:1px solid #d7dee8; border-radius:8px; padding:10px 11px; color:#152033; background:#fff; font:inherit; }
+.subject-manager-counts { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+@media (max-width:760px){.subject-tools{align-items:stretch}.subject-tools input{flex-basis:100%}.subject-manager-row{grid-template-columns:1fr}.tag-row{grid-template-columns:27px minmax(0,1fr) auto}.tag-row .row-mini-btn{display:none}}
+.question-media { display:grid; gap:14px; margin:4px 0 22px; }
+.media-card { margin:0; border:1px solid #dfe5ee; border-radius:10px; overflow:hidden; background:#fff; }
+.media-card img { display:block; max-width:100%; width:auto; max-height:560px; margin:0 auto; object-fit:contain; background:#f8fafc; }
+.media-card figcaption { padding:9px 12px; color:#68758a; font-size:13px; line-height:1.45; border-top:1px solid #e7ebf0; overflow-wrap:anywhere; }
+.chart-card { padding:12px; overflow-x:auto; }
+.chart-card svg { display:block; width:100%; min-width:520px; height:auto; }
+.media-thumb { max-width:220px; max-height:130px; object-fit:contain; border:1px solid #dfe5ee; border-radius:8px; background:#f8fafc; margin-top:10px; }
+.media-badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:4px 8px; background:#edf7ff; color:#1c5d91; font-size:12px; font-weight:700; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(12,22,36,.58); z-index:100; display:grid; place-items:center; padding:20px; }
+.modal-card { width:min(920px,100%); max-height:94vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 24px 70px rgba(0,0,0,.28); }
+.modal-head { position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 20px; background:#fff; border-bottom:1px solid #dfe5ee; }
+.modal-head h3 { margin:0; }
+.icon-button { width:36px; height:36px; border:1px solid #dfe5ee; border-radius:8px; background:#fff; font-size:22px; line-height:1; }
+.editor-form { padding:20px; display:grid; gap:20px; }
+.editor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.editor-grid .full { grid-column:1/-1; }
+.editor-form label { display:grid; gap:6px; font-weight:650; }
+.editor-form input,.editor-form select,.editor-form textarea { width:100%; border:1px solid #d7dee8; border-radius:8px; padding:10px 11px; color:#152033; background:#fff; font:inherit; }
+.editor-form textarea { min-height:92px; resize:vertical; line-height:1.45; }
+.editor-section { border:1px solid #dfe5ee; border-radius:10px; padding:15px; }
+.editor-section h4 { margin:0 0 12px; }
+.option-editor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.image-editor-preview { display:none; max-width:100%; max-height:260px; object-fit:contain; border:1px solid #dfe5ee; border-radius:8px; background:#f8fafc; margin-top:10px; }
+.image-editor-preview.has-image { display:block; }
+.editor-note { color:#68758a; font-size:12px; line-height:1.45; margin:7px 0 0; }
+.modal-actions { position:sticky; bottom:0; display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; background:#fff; border-top:1px solid #dfe5ee; }
+@media (max-width:700px){.editor-grid,.option-editor-grid{grid-template-columns:1fr}.editor-grid .full{grid-column:auto}.modal-backdrop{padding:0}.modal-card{border-radius:0;max-height:100vh;height:100vh}.chart-card svg{min-width:460px}}
+.recent-list { padding:16px 18px; }
+.recent-session { padding:15px 0; border-bottom:1px solid #c8c8c8; }
+.recent-session:first-child { padding-top:3px; }
+.recent-session:last-child { border-bottom:0; }
+.recent-kicker { color:#999; font-size:12px; text-transform:uppercase; margin-bottom:7px; }
+.recent-title { font-size:15px; line-height:1.35; margin-bottom:8px; }
+.recent-meta { color:#66727c; font-size:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.recent-score { font-weight:700; }
+.empty-compact { color:#7d8790; padding:28px 0; text-align:center; }
+@media (max-width:1200px){.bank-layout{grid-template-columns:1fr}.bank-actionbar{justify-content:space-between}}
+@media (max-width:760px){.app-shell{grid-template-columns:1fr}.sidebar{height:auto}.brand{min-height:auto}.nav-list{grid-template-columns:1fr 1fr}.nav-section-label{display:none}.main-content{padding:12px}.bank-actionbar{align-items:stretch;flex-direction:column}.bank-action-controls{display:grid;grid-template-columns:1fr 1fr}.bank-action-controls .btn{grid-column:1/-1}.category-row{grid-template-columns:27px minmax(130px,1fr) auto}.subject-progress{display:none}.topbar{display:none}}
+
+
+/* Local dashboard home */
+.main-content.home-active { padding-top:0; }
+.main-content.home-active > .topbar { display:none; }
+.home-view { max-width:1360px; margin:0 auto; }
+.home-utility { min-height:66px; display:grid; grid-template-columns:auto minmax(260px,480px) auto; align-items:center; justify-content:space-between; gap:18px; padding:10px 4px 14px; }
+.home-menu-button,.home-avatar-button,.home-search-button { border:1px solid #d4d9dd; background:#fff; color:#53616c; border-radius:6px; height:35px; min-width:43px; display:grid; place-items:center; box-shadow:0 2px 7px rgba(0,0,0,.04); }
+.home-search { display:grid; grid-template-columns:1fr 38px; width:100%; }
+.home-search input { min-width:0; height:35px; border:1px solid #d4d9dd; border-right:0; border-radius:5px 0 0 5px; padding:0 12px; background:#fff; box-shadow:0 2px 7px rgba(0,0,0,.04); }
+.home-search-button { min-width:38px; border-radius:0 5px 5px 0; box-shadow:none; }
+.home-hero { position:relative; overflow:hidden; background:#fff; border-radius:0 0 10px 10px; min-height:286px; padding:22px 26px 24px; margin:0 -2px 18px; }
+.home-hero::before { content:""; position:absolute; right:0; top:0; width:37%; height:100%; background:linear-gradient(145deg,rgba(216,251,238,.88),rgba(227,246,255,.65)); clip-path:polygon(34% 0,100% 0,100% 100%,0 100%,18% 48%); }
+.home-hero::after { content:""; position:absolute; right:7%; top:0; width:26%; height:100%; background:rgba(216,241,255,.48); clip-path:polygon(48% 0,100% 0,74% 100%,0 100%); }
+.home-title-row,.home-insight-layout { position:relative; z-index:1; }
+.home-title-row { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:28px; }
+.home-title { display:flex; align-items:center; gap:13px; }
+.home-mini-logo { display:flex; align-items:flex-end; gap:3px; height:28px; }
+.home-mini-logo i { display:block; width:7px; border-radius:1px 1px 0 0; }
+.home-mini-logo i:nth-child(1){height:10px;background:#ff2739}.home-mini-logo i:nth-child(2){height:18px;background:#ffd51f}.home-mini-logo i:nth-child(3){height:27px;background:#75ff00}
+.home-title h2 { margin:0; font-size:30px; font-weight:400; color:#222; }
+.exam-date-control { display:flex; align-items:center; gap:8px; }
+.exam-date-control label { color:#5d6770; font-size:13px; }
+.exam-date-control input { border:1px solid #d6dce1; border-radius:5px; padding:8px 9px; background:rgba(255,255,255,.92); }
+.home-insight-layout { display:grid; grid-template-columns:minmax(330px,1fr) 190px minmax(330px,1fr); gap:30px; align-items:center; }
+.heatmap-block h3 { margin:0 0 9px; font-size:13px; font-weight:600; color:#66717a; text-transform:uppercase; letter-spacing:.04em; }
+.heatmap-with-labels { display:grid; grid-template-columns:17px 1fr; gap:7px; align-items:stretch; }
+.heatmap-day-labels { display:grid; grid-template-rows:repeat(7,13px); gap:4px; font-size:11px; color:#68747d; line-height:13px; }
+.heatmap-grid { display:grid; grid-template-rows:repeat(7,13px); grid-auto-flow:column; grid-auto-columns:13px; gap:4px; overflow:hidden; }
+.heat-cell { width:13px; height:13px; border-radius:2px; background:#e9edf0; }
+.heat-cell.activity-1{background:#c9f5d4}.heat-cell.activity-2{background:#91e9ad}.heat-cell.activity-3{background:#48c978}.heat-cell.activity-4{background:#139b51}
+.heat-cell.accuracy-1{background:#ffb6a0}.heat-cell.accuracy-2{background:#ff8a68}.heat-cell.accuracy-3{background:#f15b3a}.heat-cell.accuracy-4{background:#24b66f}
+.home-summary-chips { display:grid; gap:9px; justify-items:center; }
+.home-summary-chip { min-width:118px; text-align:center; border-radius:7px; padding:7px 12px; font-size:13px; font-weight:600; background:#eff3f5; color:#34434f; }
+.home-summary-chip.amber{background:#fff3c7;color:#8a6511}.home-summary-chip.green{background:#dff6de;color:#286f39}.home-summary-chip.mint{background:#d9f4da;color:#286f39}.home-summary-chip.coral{background:#ffe0d6;color:#b1472b}
+.home-card-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.home-card { background:#fff; border:1px solid #d1d1d1; border-radius:6px; box-shadow:0 5px 15px rgba(0,0,0,.08); overflow:hidden; min-width:0; }
+.home-card-head { min-height:41px; display:flex; justify-content:space-between; align-items:center; gap:14px; padding:9px 16px; border-bottom:1px solid #d1d1d1; background:#fbfbfb; }
+.home-card-head h3 { margin:0; font-size:16px; font-weight:500; text-transform:uppercase; }
+.home-card-body { padding:16px; min-height:148px; }
+.home-card-progress { height:14px; max-width:305px; flex:1; border-radius:10px; background:#e7ebee; overflow:hidden; display:flex; }
+.home-card-progress .good{background:#28cdb5}.home-card-progress .bad{background:#ff6464}
+.home-card-kicker { color:#8a8f94; font-size:12px; text-transform:uppercase; margin-bottom:7px; }
+.home-card-title { font-size:19px; line-height:1.35; margin-bottom:8px; overflow-wrap:anywhere; }
+.home-card-meta { color:#68747d; font-size:13px; margin-top:12px; }
+.home-card-row { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+.home-card-row .btn { flex:0 0 auto; }
+.home-metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.home-metric { padding:12px; background:#f7f8fa; border:1px solid #e5e8eb; border-radius:7px; }
+.home-metric span { display:block; color:#7a858e; font-size:12px; }
+.home-metric strong { display:block; margin-top:5px; font-size:21px; font-weight:600; }
+.home-review-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.home-review-tile { display:flex; align-items:center; justify-content:space-between; gap:10px; border:1px solid #e1e5e8; border-radius:7px; padding:13px; background:#fafbfc; }
+.home-review-tile strong { display:block; margin-top:5px; font-size:24px; }
+.home-review-tile span { display:block; color:#64717a; font-size:13px; }
+.home-quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.home-quick-actions .btn { min-height:54px; white-space:normal; }
+.home-empty-note { color:#6f7a83; line-height:1.55; }
+.programme-label { color:#cbd6df; padding:17px 10px 6px; font-size:15px; line-height:1.45; }
+@media(max-width:1100px){.home-insight-layout{grid-template-columns:1fr 160px}.home-insight-layout .heatmap-block:last-child{grid-column:1/-1}.home-card-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.main-content.home-active{padding-top:0}.home-utility{grid-template-columns:auto 1fr auto}.home-hero{margin:0 0 14px;padding:20px 14px}.home-title-row{align-items:flex-start;flex-direction:column}.home-title h2{font-size:24px}.home-insight-layout{grid-template-columns:1fr;gap:18px}.home-insight-layout .heatmap-block:last-child{grid-column:auto}.home-summary-chips{grid-template-columns:1fr 1fr;justify-items:stretch}.home-summary-chip{min-width:0}.heatmap-grid{grid-auto-columns:12px;grid-template-rows:repeat(7,12px);gap:3px}.heat-cell{width:12px;height:12px}.heatmap-day-labels{grid-template-rows:repeat(7,12px);gap:3px}.home-metric-grid,.home-quick-actions{grid-template-columns:1fr}.home-review-grid{grid-template-columns:1fr}.programme-label{display:none}}
+
+
+/* Adjustable compact quiz workspace — PassMedicine-inspired */
+:root {
+  --quiz-font-scale: .90;
+  --quiz-main-width: 840px;
+  --quiz-sidebar-width: 210px;
+}
+.main-content.quiz-active { padding: 14px 20px 28px; }
+.main-content.quiz-active > .topbar { display: none; }
+#view-quiz { width: 100%; }
+.quiz-session-shell { max-width: calc(var(--quiz-main-width) + var(--quiz-sidebar-width) + 18px); margin: 0 auto; }
+.quiz-session-bar { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 14px; align-items: center; margin-bottom: 10px; }
+.quiz-session-bar .quiz-topline { margin: 0; }
+.quiz-display-toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
+.quiz-display-group { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 3px; border: 1px solid #d6dde6; border-radius: 6px; background: #fff; }
+.quiz-display-group > span { padding: 0 5px; color: #68758a; font-size: 12px; white-space: nowrap; }
+.quiz-display-button { min-width: 32px; height: 28px; border: 0; border-radius: 4px; padding: 0 8px; background: transparent; color: #304052; font-weight: 650; }
+.quiz-display-button:hover { transform: none; background: #eef4fb; }
+.quiz-display-button.active { background: #dcecff; color: #075fb5; }
+.quiz-display-select { height: 28px; max-width: 116px; border: 0; border-radius: 4px; padding: 0 6px; background: #f7f9fb; color: #304052; font-size: 12px; }
+.quiz-workspace { display: grid; grid-template-columns: minmax(0,1fr) var(--quiz-sidebar-width); gap: 18px; align-items: start; justify-content: center; }
+#view-quiz.hide-quiz-sidebar .quiz-workspace { grid-template-columns: minmax(0,1fr); max-width: var(--quiz-main-width); margin-inline: auto; }
+#view-quiz.hide-quiz-sidebar .quiz-sidebar { display: none; }
+.panel.quiz-panel { max-width: none; width: 100%; margin: 0; padding: 18px; border-radius: 7px; box-shadow: 0 2px 8px rgba(31,45,70,.06); }
+.question-meta { gap: 6px; }
+.chip { padding: 4px 8px; font-size: 11px; }
+.question-text { font-size: calc(20px * var(--quiz-font-scale)); line-height: 1.48; margin: 14px 0 16px; font-weight: 500; }
+.option-list { gap: 8px; }
+.option-button { grid-template-columns: 28px minmax(0,1fr); gap: 10px; padding: 11px 12px; border-radius: 7px; font-size: calc(16px * var(--quiz-font-scale)); line-height: 1.45; }
+.option-key { width: 25px; height: 25px; border-radius: 50%; font-size: 13px; font-weight: 650; }
+.feedback { margin-top: 14px; padding: 15px; border-radius: 7px; font-size: calc(15px * var(--quiz-font-scale)); }
+.feedback p { line-height: 1.55; }
+.quiz-actions { margin-top: 16px; }
+.question-media { margin: 2px 0 16px; }
+.media-card img { max-height: 470px; }
+.timer-box { min-width: 112px; padding: 7px 12px; border-radius: 7px; }
+.timer-box strong { font-size: 19px; }
+.progress { height: 6px; margin-top: 6px; }
+.quiz-sidebar { position: sticky; top: 12px; border: 1px solid #ddd8c8; border-radius: 7px; background: #fffdf4; overflow: hidden; box-shadow: 0 2px 8px rgba(31,45,70,.05); }
+.quiz-sidebar-head { padding: 12px 13px; border-bottom: 1px solid #e7e1d3; text-align: center; background: #fffef9; }
+.quiz-sidebar-head span { display: block; color: #7a7f86; font-size: 12px; }
+.quiz-sidebar-head strong { display: block; margin-top: 3px; font-size: 20px; font-weight: 550; }
+.quiz-sidebar-summary { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #ece6d8; color: #68717a; font-size: 11px; }
+.quiz-question-nav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; max-height: 62vh; overflow: auto; padding: 11px; }
+.quiz-nav-number { display: grid; place-items: center; min-width: 0; height: 27px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #5f9fe7; font-size: 12px; }
+.quiz-nav-number.current { border-color: #1677df; background: #e9f3ff; color: #075fb5; font-weight: 750; }
+.quiz-nav-number.correct { background: #e4f7e9; color: #19713b; }
+.quiz-nav-number.wrong { background: #ffe8e6; color: #b53730; }
+.quiz-nav-number.skipped { background: #fff4cf; color: #8a6200; border-color: #e8cc72; }
+button.quiz-nav-number { cursor: pointer; padding: 0; font: inherit; }
+button.quiz-nav-number:hover { border-color: #85b9ef; background: #f2f8ff; }
+.quiz-nav-number.current.correct { border-color: #2b9b50; }
+.quiz-nav-number.current.wrong { border-color: #d94b43; }
+#view-quiz.quiz-density-compact .panel.quiz-panel { padding: 14px 16px; }
+#view-quiz.quiz-density-compact .question-text { margin: 10px 0 13px; line-height: 1.42; }
+#view-quiz.quiz-density-compact .option-list { gap: 0; }
+#view-quiz.quiz-density-compact .option-button { padding: 9px 11px; border-radius: 0; }
+#view-quiz.quiz-density-compact .option-button + .option-button { border-top: 0; }
+#view-quiz.quiz-density-compact .option-button:first-child { border-radius: 6px 6px 0 0; }
+#view-quiz.quiz-density-compact .option-button:last-child { border-radius: 0 0 6px 6px; }
+#view-quiz.quiz-density-compact .quiz-actions { margin-top: 13px; }
+@media (max-width: 1120px) {
+  .quiz-workspace { grid-template-columns: minmax(0,1fr) 190px; }
+  :root { --quiz-sidebar-width: 190px; }
+}
+@media (max-width: 900px) {
+  .quiz-session-bar { grid-template-columns: 1fr; }
+  .quiz-display-toolbar { justify-content: flex-start; }
+  .quiz-workspace { grid-template-columns: minmax(0,1fr); }
+  .quiz-sidebar { position: static; }
+  .quiz-question-nav { grid-template-columns: repeat(10,minmax(0,1fr)); max-height: 150px; }
+}
+@media (max-width: 600px) {
+  .main-content.quiz-active { padding: 8px; }
+  .quiz-display-toolbar { gap: 5px; }
+  .quiz-display-group > span { display: none; }
+  .quiz-display-select { max-width: 94px; }
+  .panel.quiz-panel { padding: 13px; }
+  .question-text { font-size: calc(18px * var(--quiz-font-scale)); }
+  .option-button { font-size: calc(15px * var(--quiz-font-scale)); }
+  .quiz-question-nav { grid-template-columns: repeat(7,minmax(0,1fr)); }
+}
+
+
+
+/* v11: collapsible navigation and editable programme label */
+.app-shell,
+.sidebar,
+.main-content { transition: grid-template-columns .22s ease, transform .22s ease, opacity .18s ease, padding .22s ease; }
+.sidebar { overflow-x: hidden; z-index: 40; }
+.sidebar-toggle {
+  position: absolute;
+  top: 14px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 7px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  z-index: 3;
+}
+.sidebar-toggle:hover { background: rgba(255,255,255,.16); }
+.brand-copy { min-width: 0; padding-right: 28px; }
+.programme-label { display: grid; gap: 2px; }
+.programme-label small { color: #b9c6d1; font-size: 14px; }
+.sidebar-reopen {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 90;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #cfd6dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #294155;
+  box-shadow: 0 4px 14px rgba(0,0,0,.14);
+  font-size: 21px;
+  place-items: center;
+}
+.app-shell.sidebar-collapsed { grid-template-columns: 0 minmax(0,1fr); }
+.app-shell.sidebar-collapsed .sidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.app-shell.sidebar-collapsed .sidebar-reopen { display: grid; }
+.app-shell.sidebar-collapsed .main-content { padding-left: 22px; }
+.settings-editor { padding: 16px; display: grid; gap: 14px; }
+.settings-editor-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.settings-editor label { display: grid; gap: 7px; font-weight: 650; }
+.settings-editor input {
+  width: 100%;
+  border: 1px solid #d7dee8;
+  border-radius: 7px;
+  padding: 10px 11px;
+  color: #152033;
+  background: #fff;
+}
+.settings-help { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+@media (max-width:760px) {
+  .app-shell.sidebar-collapsed { grid-template-columns: 1fr; }
+  .app-shell.sidebar-collapsed .sidebar { display: none; }
+  .app-shell.sidebar-collapsed .main-content { padding-left: 12px; }
+  .settings-editor-grid { grid-template-columns: 1fr; }
+  .sidebar-toggle { top: 12px; right: 12px; }
+}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <button id="sidebarToggleBtn" class="sidebar-toggle" type="button" aria-label="Hide sidebar" title="Hide sidebar">‹</button>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="brand-copy">
+          <h1>MedQ Local</h1>
+          <p>Offline personal question bank</p>
+        </div>
+      </div>
+      <div class="programme-label"><span id="programmeTitleDisplay">Medical student years</span><small id="programmeSubtitleDisplay">1–3</small></div>
+      <nav id="mainNav" class="nav-list">
+        <button class="nav-item active" data-view="home" title="Home"><span class="nav-icon">⌂</span><span class="nav-label">Home</span></button>
+        <div class="nav-section-label">Questions</div>
+        <button class="nav-item" data-view="dashboard" title="Question Bank"><span class="nav-icon">▰</span><span class="nav-label">Question Bank</span></button>
+        <button class="nav-item" data-view="quizSetup" title="Fixed Sets & Timed Tests"><span class="nav-icon">◷</span><span class="nav-label">Fixed Sets & Timed Tests</span></button>
+        <button class="nav-item" data-view="review" title="Review Questions"><span class="nav-icon">◎</span><span class="nav-label">Review Questions</span></button>
+        <div class="nav-section-label">Manage</div>
+        <button class="nav-item" data-view="import" title="Import Questions"><span class="nav-icon">⇧</span><span class="nav-label">Import Questions</span></button>
+        <button class="nav-item" data-view="questions" title="Manage Question Bank"><span class="nav-icon">☷</span><span class="nav-label">Manage Question Bank</span></button>
+        <button class="nav-item" data-view="settings" title="Backup & Settings"><span class="nav-icon">⚙</span><span class="nav-label">Backup & Settings</span></button>
+      </nav>
+      <div class="sidebar-footer"><span id="storageStatus">All data stays in this browser</span></div>
+    </aside>
+    <button id="sidebarReopenBtn" class="sidebar-reopen" type="button" aria-label="Show sidebar" title="Show sidebar">☰</button>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Question Bank</h2>
+          <p id="pageSubtitle">Choose one or more subjects, then start a local practice session.</p>
+        </div>
+        <div class="topbar-actions"><button id="quickStartBtn" class="btn btn-primary">Quick Practice: 10 Questions</button></div>
+      </header>
+
+      <section id="view-home" class="view active home-view">
+        <div class="home-utility">
+          <button id="homeSidebarToggleBtn" class="home-menu-button" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
+          <div class="home-search"><input id="homeSearchInput" placeholder="Search your local question bank" aria-label="Search question bank"><button id="homeSearchButton" class="home-search-button" type="button" aria-label="Search">⌕</button></div>
+          <button class="home-avatar-button" type="button" aria-label="Local profile">●</button>
+        </div>
+        <section class="home-hero">
+          <div class="home-title-row">
+            <div class="home-title"><span class="home-mini-logo" aria-hidden="true"><i></i><i></i><i></i></span><h2 id="homeProgrammeDisplay">Medical student years 1–3</h2></div>
+            <div class="exam-date-control"><label for="homeExamDate">Exam date</label><input id="homeExamDate" type="date"></div>
+          </div>
+          <div class="home-insight-layout">
+            <div class="heatmap-block"><h3>Questions answered</h3><div id="homeActivityHeatmap"></div></div>
+            <div class="home-summary-chips">
+              <div id="homeTodayCount" class="home-summary-chip amber">0 today</div>
+              <div id="homeStreak" class="home-summary-chip green">0 day streak</div>
+              <div id="homeDailyAverage" class="home-summary-chip mint">0 daily average</div>
+              <div id="homeRecentTrend" class="home-summary-chip coral">No recent scores</div>
+            </div>
+            <div class="heatmap-block"><h3>Daily accuracy</h3><div id="homeAccuracyHeatmap"></div></div>
+          </div>
+        </section>
+
+        <div class="home-card-grid">
+          <article class="home-card">
+            <div class="home-card-head"><h3>Question Bank</h3><div class="home-card-progress"><span id="homeQuestionGood" class="good"></span><span id="homeQuestionBad" class="bad"></span></div><button id="homeOpenBankBtn" class="home-menu-button" type="button" title="Open question bank">☷</button></div>
+            <div id="homeQuestionCard" class="home-card-body"></div>
+          </article>
+          <article class="home-card">
+            <div class="home-card-head"><h3>Performance</h3><button id="homeOpenPerformanceBtn" class="home-menu-button" type="button" title="Open results">↗</button></div>
+            <div class="home-card-body"><div class="home-metric-grid"><div class="home-metric"><span>Answered</span><strong id="homeAnsweredMetric">0</strong></div><div class="home-metric"><span>Accuracy</span><strong id="homeAccuracyMetric">—</strong></div><div class="home-metric"><span>Avg. time</span><strong id="homeTimeMetric">—</strong></div></div><p id="homeWeakestSubject" class="home-card-meta">Answer some questions to see subject insights.</p></div>
+          </article>
+          <article class="home-card">
+            <div class="home-card-head"><h3>Review Queue</h3><button id="homeOpenReviewBtn" class="home-menu-button" type="button" title="Open review">◎</button></div>
+            <div class="home-card-body"><div class="home-review-grid"><div class="home-review-tile"><div><span>Wrong questions</span><strong id="homeWrongCount">0</strong></div><button id="homeWrongBtn" class="btn btn-secondary" type="button">Review</button></div><div class="home-review-tile"><div><span>Bookmarked</span><strong id="homeBookmarkCount">0</strong></div><button id="homeBookmarkBtn" class="btn btn-secondary" type="button">Open</button></div></div></div>
+          </article>
+          <article class="home-card">
+            <div class="home-card-head"><h3>Local Tools</h3><span class="chip">Offline</span></div>
+            <div class="home-card-body"><div class="home-quick-actions"><button id="homeImportBtn" class="btn btn-secondary" type="button">Import questions</button><button id="homeAddQuestionBtn" class="btn btn-secondary" type="button">Add a question</button><button id="homeBackupBtn" class="btn btn-secondary" type="button">Backup data</button></div><p class="home-card-meta">Your questions, images, graphs, answers, and settings remain in this browser.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-dashboard" class="view">
+        <div class="bank-summary">
+          <div class="overall-progress" aria-label="Overall progress"><span id="overallCorrectBar" class="correct"></span><span id="overallWrongBar" class="wrong"></span></div>
+          <p id="overallSummary" class="summary-copy">You have not answered any questions yet.</p>
+        </div>
+
+        <div class="bank-actionbar">
+          <div id="questionsFound" class="found-count">0 questions found</div>
+          <div class="bank-action-controls">
+            <label>Questions <input id="dashboardQuizCount" type="number" min="1" value="20" style="width:82px"></label>
+            <select id="dashboardQuizMode" aria-label="Quiz mode"><option value="practice">Practice</option><option value="exam">Timed test</option></select>
+            <label id="dashboardDurationLabel" class="hidden">Minutes <input id="dashboardDuration" type="number" min="1" value="30" style="width:78px"></label>
+            <button id="startSelectedBtn" class="btn btn-primary btn-large">Start selected subjects ›</button>
+          </div>
+        </div>
+
+        <div class="bank-layout">
+          <article class="panel">
+            <div class="panel-head"><h3>Categories</h3><button id="manageSubjectsDashboardBtn" class="btn btn-secondary subject-edit-button" type="button">✎ Edit subjects</button></div>
+            <div class="subject-tools" aria-label="Subject selection controls">
+              <input id="subjectFilter" type="search" placeholder="Find a subject or subtopic">
+              <button id="selectAllSubjectBtn" class="btn btn-secondary" type="button">Select all</button>
+              <button id="clearSubjectBtn" class="btn btn-secondary" type="button">Clear</button>
+              <button id="expandAllSubjectBtn" class="btn btn-secondary" type="button">Expand all</button>
+              <button id="collapseAllSubjectBtn" class="btn btn-secondary" type="button">Collapse</button>
+            </div>
+            <div id="subjectCategoryList" class="category-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><h3>Recent Sessions</h3></div>
+            <div id="recentSessions" class="recent-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-import" class="view">
+        <div class="two-col import-layout">
+          <article class="panel">
+            <div class="panel-head"><h3>Upload Question File</h3></div>
+            <div class="drop-zone" id="dropZone">
+              <input id="fileInput" type="file" accept=".json,.csv,.md,.markdown,.txt" hidden />
+              <div class="drop-icon">⇧</div>
+              <h4>Drop a file here</h4>
+              <p>Supports JSON, CSV, Markdown, and TXT</p>
+              <button id="chooseFileBtn" class="btn btn-secondary">Choose File</button>
+            </div>
+            <div class="inline-actions">
+              <button id="loadSampleBtn" class="btn btn-ghost">Load Sample Questions</button>
+              <button id="downloadTemplateBtn" class="btn btn-ghost">Download JSON Template</button>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><h3>Import Guide</h3></div>
+            <div class="help-copy">
+              <h4>Recommended JSON Format</h4>
+              <pre><code>[
+  {
+    "id": "Q001",
+    "question": "Question text",
+    "options": {"A":"First option","B":"Second option"},
+    "answer": ["A"],
+    "explanation": "Detailed explanation",
+    "references": ["Reference or source"],
+    "subject": "Subject",
+    "tags": ["Chapter", "Tag"],
+    "image": {"src": "data:image/png;base64,...", "alt": "Anatomy diagram", "caption": "Optional caption"},
+    "chart": {"type": "bar", "title": "Values", "labels": ["A","B"], "values": [12,19]}
+  }
+]</code></pre>
+              <p><strong>Duplicate IDs are safe:</strong> when another bank uses an existing ID, MedQ automatically creates a unique source-based ID instead of overwriting the old question.</p>
+              <h4>CSV Columns</h4>
+              <p><code>id,question,option_a,option_b,option_c,option_d,answer,explanation,references,subject,tags,image,image_alt,image_caption,chart_type,chart_title,chart_labels,chart_values</code></p>
+              <h4>Markdown / TXT</h4>
+              <p>Separate questions with <code>---</code>. Fields can include <code># Q001</code>, <code>Question:</code>, <code>A.</code>, <code>Answer:</code>, <code>Image:</code>, <code>Chart Type:</code>, <code>Chart Labels:</code>, and <code>Chart Values:</code>.</p>
+              <p><strong>Tip:</strong> The built-in question editor can attach local images. For larger image collections, connect a project file in Backup & Settings so the data is stored in a file instead of browser local storage.</p>
+            </div>
+          </article>
+        </div>
+        <article id="importPreviewPanel" class="panel hidden">
+          <div class="panel-head">
+            <div><h3>Import Preview</h3><p id="importSummary"></p></div>
+            <div class="inline-actions">
+              <button id="cancelImportBtn" class="btn btn-ghost">Cancel</button>
+              <button id="confirmImportBtn" class="btn btn-primary">Import Questions</button>
+            </div>
+          </div>
+          <div id="importErrors" class="alert hidden"></div>
+          <div id="importPreview" class="preview-list"></div>
+        </article>
+      </section>
+
+      <section id="view-quizSetup" class="view">
+        <article class="panel narrow-panel">
+          <div class="panel-head"><h3>Create a Quiz</h3></div>
+          <form id="quizSetupForm" class="form-grid">
+            <label>Mode
+              <select id="quizMode">
+                <option value="practice">Practice</option>
+                <option value="exam">Timed Exam</option>
+              </select>
+            </label>
+            <label>Number of Questions
+              <input id="quizCount" type="number" min="1" value="10" />
+            </label>
+            <label id="durationField" class="hidden">Total Time (minutes)
+              <input id="quizDuration" type="number" min="1" value="20" />
+            </label>
+            <label>Subject
+              <select id="quizSubject"><option value="">All Subjects</option></select>
+            </label>
+            <label>Tag
+              <select id="quizTag"><option value="">All Tags</option></select>
+            </label>
+            <label>Question Source
+              <select id="quizSource">
+                <option value="all">All Questions</option>
+                <option value="wrong">Wrong Questions Only</option>
+                <option value="bookmarked">Bookmarks Only</option>
+              </select>
+            </label>
+            <label class="check-row"><input id="shuffleQuestions" type="checkbox" checked /> Shuffle question order</label>
+            <label class="check-row"><input id="shuffleOptions" type="checkbox" /> Shuffle answer options</label>
+            <div id="quizSetupMessage" class="alert hidden"></div>
+            <button class="btn btn-primary btn-large" type="submit">Start Quiz</button>
+          </form>
+        </article>
+      </section>
+
+      <section id="view-quiz" class="view">
+        <div class="quiz-session-shell">
+          <div class="quiz-session-bar">
+            <div class="quiz-topline">
+              <div><strong id="quizProgressLabel">Question 1 of 10</strong><div class="progress"><span id="quizProgressBar"></span></div></div>
+              <div class="timer-box"><span id="timerLabel">Time on Question</span><strong id="quizTimer">00:00</strong></div>
+            </div>
+            <div class="quiz-display-toolbar" aria-label="Quiz display controls">
+              <div class="quiz-display-group" title="Adjust question text size">
+                <span>Text</span>
+                <button id="quizTextSmallerBtn" class="quiz-display-button" type="button" aria-label="Smaller text">A−</button>
+                <button id="quizTextResetBtn" class="quiz-display-button" type="button" aria-label="Reset text size"><span id="quizTextSizeLabel">90%</span></button>
+                <button id="quizTextLargerBtn" class="quiz-display-button" type="button" aria-label="Larger text">A+</button>
+              </div>
+              <div class="quiz-display-group">
+                <span>Width</span>
+                <select id="quizWidthSelect" class="quiz-display-select" aria-label="Question width">
+                  <option value="narrow">Narrow</option>
+                  <option value="standard">Standard</option>
+                  <option value="wide">Wide</option>
+                </select>
+              </div>
+              <div class="quiz-display-group">
+                <button id="quizDensityBtn" class="quiz-display-button" type="button">Compact</button>
+                <button id="quizSidebarBtn" class="quiz-display-button" type="button">Navigator</button>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-workspace">
+            <article class="panel quiz-panel">
+              <div class="question-meta"><span id="questionSubject" class="chip"></span><div id="questionTags" class="chip-row"></div></div>
+              <h3 id="questionText" class="question-text"></h3>
+              <div id="questionMedia" class="question-media hidden"></div>
+              <div id="answerOptions" class="option-list"></div>
+              <div id="answerFeedback" class="feedback hidden"></div>
+              <div class="quiz-actions">
+                <button id="exitQuizBtn" class="btn btn-ghost">End Quiz</button>
+                <div class="inline-actions">
+                  <button id="previousQuestionBtn" class="btn btn-secondary" type="button">← Previous</button>
+                  <button id="bookmarkCurrentBtn" class="btn btn-secondary">☆ Bookmark</button>
+                  <button id="skipQuestionBtn" class="btn btn-secondary" type="button">Skip ›</button>
+                  <button id="submitAnswerBtn" class="btn btn-primary">Submit Answer</button>
+                  <button id="nextQuestionBtn" class="btn btn-primary hidden">Next Question</button>
+                </div>
+              </div>
+            </article>
+            <aside class="quiz-sidebar" aria-label="Quiz score and question navigator">
+              <div class="quiz-sidebar-head"><span>Score</span><strong id="quizLiveScore">0%</strong></div>
+              <div class="quiz-sidebar-summary"><span id="quizAnsweredSummary">0 answered</span><span id="quizCorrectSummary">0 correct</span></div>
+              <div id="quizQuestionNavigator" class="quiz-question-nav"></div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-results" class="view">
+        <article class="panel result-hero">
+          <span class="eyebrow">Quiz Complete</span>
+          <h3 id="resultHeadline">Complete!</h3>
+          <div class="result-grid">
+            <div><span>Score</span><strong id="resultScore">0%</strong></div>
+            <div><span>Correct</span><strong id="resultCorrect">0 / 0</strong></div>
+            <div><span>Average Time</span><strong id="resultAvgTime">0 sec</strong></div>
+          </div>
+          <div class="inline-actions center">
+            <button id="reviewSessionBtn" class="btn btn-secondary">Review This Session</button>
+            <button id="newQuizBtn" class="btn btn-primary">Start Another Quiz</button>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h3>Questions in This Session</h3></div>
+          <div id="resultDetails" class="stack-list"></div>
+        </article>
+      </section>
+
+      <section id="view-review" class="view">
+        <article class="panel">
+          <div class="panel-head">
+            <div><h3>Review & Bookmarks</h3><p>Repeat difficult questions, sorted by number of errors.</p></div>
+            <div class="segmented">
+              <button class="segment active" data-review-filter="wrong">Wrong</button>
+              <button class="segment" data-review-filter="bookmarked">Bookmarked</button>
+              <button class="segment" data-review-filter="all">All</button>
+            </div>
+          </div>
+          <div id="reviewList" class="stack-list empty-state">No items yet</div>
+        </article>
+      </section>
+
+      <section id="view-questions" class="view">
+        <article class="panel">
+          <div class="panel-head">
+            <div><h3>Question Bank</h3><p id="questionCountLabel">0 questions</p></div>
+            <div class="inline-actions">
+              <input id="questionSearch" class="compact-input" placeholder="Search questions, subjects, or tags" />
+              <button id="manageSubjectsBtn" class="btn btn-secondary" type="button">✎ Edit Subjects</button>
+              <button id="addQuestionBtn" class="btn btn-primary">Add Question</button>
+              <button id="deleteAllQuestionsBtn" class="btn btn-danger">Clear Question Bank</button>
+            </div>
+          </div>
+          <div id="questionList" class="stack-list empty-state">No questions yet</div>
+        </article>
+      </section>
+
+      <section id="view-settings" class="view">
+        <article class="panel">
+          <div class="panel-head"><div><h3>Course Label</h3><p>Rename the text shown in the sidebar and on the home page.</p></div></div>
+          <div class="settings-editor">
+            <div class="settings-editor-grid">
+              <label>Programme title<input id="programmeTitleInput" maxlength="80" placeholder="Medical student years"></label>
+              <label>Level or subtitle<input id="programmeSubtitleInput" maxlength="80" placeholder="1–3"></label>
+            </div>
+            <p class="settings-help">Examples: “MRCP Part 1” and “2026 revision”, or “My Medical Question Bank” with no subtitle.</p>
+            <div class="inline-actions">
+              <button id="saveProgrammeLabelBtn" class="btn btn-primary" type="button">Save Label</button>
+              <button id="resetProgrammeLabelBtn" class="btn btn-secondary" type="button">Reset Default</button>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h3>Project File Storage</h3></div>
+          <div id="fileStorageStatus" class="file-storage-status warning">
+            <div>
+              <strong id="fileStorageStatusTitle">Browser storage is active</strong>
+              <p id="fileStorageStatusText">Move the project to a local JSON file to avoid the browser storage limit.</p>
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button id="createDataFileBtn" class="btn btn-primary">Move Current Data to File</button>
+            <button id="openDataFileBtn" class="btn btn-secondary">Open Existing Data File</button>
+            <button id="saveDataFileBtn" class="btn btn-secondary" disabled>Save File Now</button>
+          </div>
+          <p class="storage-note">When a data file is connected, questions, history, bookmarks, settings, and embedded images are automatically written to that file instead of browser local storage. Open the data file again after reopening the app.</p>
+        </article>
+        <div class="two-col">
+          <article class="panel">
+            <div class="panel-head"><h3>Portable Backup</h3></div>
+            <p>Download a separate backup copy or restore a previously exported backup.</p>
+            <div class="inline-actions">
+              <button id="exportBackupBtn" class="btn btn-primary">Export Full Backup</button>
+              <button id="importBackupBtn" class="btn btn-secondary">Import Backup</button>
+              <input id="backupFileInput" type="file" accept=".json" hidden />
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><h3>Danger Zone</h3></div>
+            <p>Permanently delete all questions, answer history, bookmarks, and settings from the active storage.</p>
+            <button id="resetAllBtn" class="btn btn-danger">Reset All Data</button>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-head"><h3>Local Privacy</h3></div>
+          <p>This app does not send data over the internet. In file mode, your project is stored in the JSON file you choose. In browser mode, it is stored in this browser's local storage.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="subjectManagerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="subjectManagerTitle">
+    <div class="modal-card" style="width:min(760px,100%)">
+      <div class="modal-head">
+        <div><h3 id="subjectManagerTitle">Subject Manager</h3><p style="margin:4px 0 0;color:#68758a">Rename, merge, or move subjects without editing JSON.</p></div>
+        <button id="closeSubjectManagerBtn" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="editor-form subject-manager-summary">
+        <section class="subject-manager-card">
+          <h4>Rename or merge a subject</h4>
+          <p>Enter a new name. Using an existing subject name merges both subjects.</p>
+          <div class="subject-manager-row">
+            <label>Current subject<select id="manageSubjectSelect"></select></label>
+            <label>New subject name<input id="manageSubjectName" placeholder="e.g. Cell Biology"></label>
+            <button id="renameSubjectBtn" class="btn btn-primary" type="button">Apply</button>
+          </div>
+          <div id="manageSubjectCounts" class="subject-manager-counts"></div>
+        </section>
+        <section class="subject-manager-card">
+          <h4>Rename a subtopic</h4>
+          <p>Changes the selected tag on every question in that subject.</p>
+          <div class="subject-manager-row">
+            <label>Subject<select id="manageSubtopicSubject"></select></label>
+            <label>Subtopic<select id="manageSubtopicSelect"></select></label>
+            <span></span>
+          </div>
+          <div class="subject-manager-row" style="margin-top:10px">
+            <label style="grid-column:1/3">New subtopic name<input id="manageSubtopicName" placeholder="e.g. Cell Biology: Cytoplasm"></label>
+            <button id="renameSubtopicBtn" class="btn btn-primary" type="button">Rename</button>
+          </div>
+        </section>
+        <section class="subject-manager-card">
+          <h4>Move a subtopic to another subject</h4>
+          <p>Moves every question carrying the selected subtopic. Other tags and answer history are preserved.</p>
+          <div class="subject-manager-row">
+            <label style="grid-column:1/3">Destination subject<input id="manageMoveSubject" placeholder="Choose an existing name or type a new one"></label>
+            <button id="moveSubtopicBtn" class="btn btn-secondary" type="button">Move questions</button>
+          </div>
+        </section>
+      </div>
+      <div class="modal-actions"><button id="doneSubjectManagerBtn" class="btn btn-primary" type="button">Done</button></div>
+    </div>
+  </div>
+
+  <div id="questionEditorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="questionEditorTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="questionEditorTitle">Add Question</h3>
+        <button id="closeQuestionEditorBtn" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <form id="questionEditorForm" class="editor-form">
+        <div class="editor-grid">
+          <label>Question ID<input id="editQuestionId" required placeholder="ANAT-001"></label>
+          <label>Subject<input id="editSubject" required placeholder="Anatomy"></label>
+          <label class="full">Subtopics / tags<input id="editTags" placeholder="Cell Biology: Cytoplasm, USMLE Step 1"><span class="editor-note">Separate tags with commas.</span></label>
+          <label class="full">Question<textarea id="editQuestionText" required placeholder="Enter the question stem"></textarea></label>
+        </div>
+        <section class="editor-section">
+          <h4>Answer options</h4>
+          <div class="option-editor-grid">
+            <label>A<input id="editOptionA"></label><label>B<input id="editOptionB"></label>
+            <label>C<input id="editOptionC"></label><label>D<input id="editOptionD"></label>
+            <label>E<input id="editOptionE"></label><label>F<input id="editOptionF"></label>
+          </div>
+          <label style="margin-top:12px">Correct answer(s)<input id="editAnswers" required placeholder="A or A,C"><span class="editor-note">Use comma-separated option letters for multiple-select questions.</span></label>
+        </section>
+        <div class="editor-grid">
+          <label class="full">Explanation<textarea id="editExplanation" placeholder="Detailed explanation"></textarea></label>
+          <label class="full">References<input id="editReferences" placeholder="Reference 1 | Reference 2"><span class="editor-note">Separate references with |.</span></label>
+        </div>
+        <section class="editor-section">
+          <h4>Question image</h4>
+          <input id="editQuestionImageFile" type="file" accept="image/*">
+          <div class="editor-grid" style="margin-top:10px"><label>Alt text<input id="editQuestionImageAlt" placeholder="Describe the image"></label><label>Caption<input id="editQuestionImageCaption" placeholder="Optional caption"></label></div>
+          <img id="editQuestionImagePreview" class="image-editor-preview" alt="Question image preview">
+          <button id="clearQuestionImageBtn" type="button" class="btn btn-ghost">Remove question image</button>
+          <p class="editor-note">Images are resized and embedded locally. No upload to the internet occurs.</p>
+        </section>
+        <section class="editor-section">
+          <h4>Explanation image</h4>
+          <input id="editExplanationImageFile" type="file" accept="image/*">
+          <div class="editor-grid" style="margin-top:10px"><label>Alt text<input id="editExplanationImageAlt" placeholder="Describe the explanation image"></label><label>Caption<input id="editExplanationImageCaption" placeholder="Optional caption"></label></div>
+          <img id="editExplanationImagePreview" class="image-editor-preview" alt="Explanation image preview">
+          <button id="clearExplanationImageBtn" type="button" class="btn btn-ghost">Remove explanation image</button>
+        </section>
+        <section class="editor-section">
+          <h4>Graph / chart</h4>
+          <div class="editor-grid">
+            <label>Chart type<select id="editChartType"><option value="">No chart</option><option value="bar">Bar chart</option><option value="line">Line chart</option></select></label>
+            <label>Title<input id="editChartTitle" placeholder="Optional chart title"></label>
+            <label class="full">Labels<input id="editChartLabels" placeholder="Resting, Exercise, Recovery"><span class="editor-note">Comma-separated labels.</span></label>
+            <label class="full">Values<input id="editChartValues" placeholder="70, 140, 85"><span class="editor-note">Comma-separated numeric values. The number of labels and values must match.</span></label>
+            <label>X-axis label<input id="editChartXLabel"></label><label>Y-axis label<input id="editChartYLabel"></label>
+          </div>
+          <div id="editChartPreview" class="question-media" style="margin-top:12px"></div>
+        </section>
+        <div class="modal-actions"><button id="cancelQuestionEditorBtn" type="button" class="btn btn-secondary">Cancel</button><button type="submit" class="btn btn-primary">Save Question</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'localQuizStudio.en.v1';
+  const defaultState = {
+    questions: [],
+    answers: [],
+    sessions: [],
+    bookmarks: [],
+    wrongCounts: {},
+    settings: { language: 'en', selectedSubjects: null, selectedSubtopics: [], examDate: '', quizFontScale: 0.9, quizWidth: 'standard', quizDensity: 'compact', quizSidebar: true, sidebarCollapsed: false, programmeTitle: 'Medical student years', programmeSubtitle: '1–3' }
+  };
+
+  let state = loadState();
+  let storageMode = 'browser';
+  let dataFileHandle = null;
+  let dataFileName = '';
+  let fileSaveQueue = Promise.resolve();
+  let lastFileSaveAt = null;
+  let fileWriteErrorShown = false;
+  let importBuffer = [];
+  let importMeta = { sourceName: '', total: 0, renamed: 0, updates: 0 };
+  let currentQuiz = null;
+  let timerInterval = null;
+  let activeReviewFilter = 'wrong';
+  const expandedSubjects = new Set();
+  let subjectManagerPreferredSubject = '';
+  let editingQuestionId = null;
+  let editorQuestionImage = null;
+  let editorExplanationImage = null;
+
+  const pageMeta = {
+    home: ['Home', 'Your local study dashboard.'],
+    dashboard: ['Question Bank', 'Choose one or more subjects, then start a local practice session.'],
+    import: ['Import Questions', 'Add questions from JSON, CSV, Markdown, or TXT files.'],
+    quizSetup: ['Start Quiz', 'Create a practice session or timed exam.'],
+    quiz: ['Quiz in Progress', 'Submit an answer to see the result and explanation immediately.'],
+    results: ['Quiz Results', 'Review your performance and answer details.'],
+    review: ['Review & Bookmarks', 'Practice frequently missed and bookmarked questions.'],
+    questions: ['Question Bank', 'Add, edit, search, and manage questions, images, and charts.'],
+    settings: ['Backup & Settings', 'Export, restore, or reset local data.']
+  };
+
+  const sampleQuestions = [
+    {
+      id: 'MED-001',
+      question: 'A 24-year-old woman presents with fatigue. Her hemoglobin is low and MCV is 72 fL. What is the most likely initial diagnosis?',
+      options: { A: 'Macrocytic anemia', B: 'Iron-deficiency anemia', C: 'Hemolytic anemia', D: 'Aplastic anemia' },
+      answer: ['B'],
+      explanation: 'An MCV below the normal range indicates microcytic anemia. Common causes include iron deficiency, thalassemia, and anemia of chronic disease. In a young woman with fatigue, iron-deficiency anemia is a common initial consideration.',
+      references: ['Sample content: replace with your own textbook or clinical guideline'],
+      subject: 'Hematology',
+      tags: ['Anemia', 'MCV'],
+      chart: { type: 'bar', title: 'MCV comparison', labels: ['Patient', 'Lower normal limit'], values: [72, 80], yLabel: 'fL' }
+    },
+    {
+      id: 'WEB-001',
+      question: 'Which HTTP status code usually means that a resource was not found?',
+      options: { A: '200', B: '301', C: '404', D: '500' },
+      answer: ['C'],
+      explanation: '404 Not Found means the server could not find the requested resource.',
+      references: ['MDN HTTP response status codes'],
+      subject: 'Web Development',
+      tags: ['HTTP', 'Fundamentals']
+    },
+    {
+      id: 'DB-001',
+      question: 'In a relational database, which normal form primarily requires eliminating partial dependencies?',
+      options: { A: 'First Normal Form', B: 'Second Normal Form', C: 'Third Normal Form', D: 'BCNF' },
+      answer: ['B'],
+      explanation: 'Second Normal Form (2NF) requires a table to be in 1NF and eliminates partial dependencies of non-key attributes on part of a candidate key.',
+      references: ['Database normalization fundamentals'],
+      subject: 'Databases',
+      tags: ['Normalization', 'SQL']
+    },
+    {
+      id: 'JS-001',
+      question: 'Which of the following JavaScript values are falsy? Select all that apply.',
+      options: { A: '0', B: '"0"', C: 'null', D: '[]' },
+      answer: ['A', 'C'],
+      explanation: 'Both 0 and null are falsy. The string "0" and an empty array [] are truthy.',
+      references: ['ECMAScript Boolean coercion'],
+      subject: 'JavaScript',
+      tags: ['Type Coercion', 'Multiple Select']
+    },
+    {
+      id: 'UX-001',
+      question: 'What is the best UX approach for a high-risk action such as permanently deleting data?',
+      options: { A: 'Hide the result', B: 'Execute immediately without warning', C: 'Provide a clear warning and confirmation', D: 'Only change the button color' },
+      answer: ['C'],
+      explanation: 'High-risk actions should clearly explain their impact, require confirmation, and provide recovery or backup options whenever possible.',
+      references: ['General usability heuristics'],
+      subject: 'UI/UX',
+      tags: ['Usability', 'Error Prevention']
+    }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+  function uid(prefix = 'id') { return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`; }
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  }
+  function formatSeconds(seconds) {
+    const safe = Math.max(0, Math.round(Number(seconds) || 0));
+    const m = Math.floor(safe / 60);
+    const s = safe % 60;
+    return m ? `${m} min ${s} sec` : `${s} sec`;
+  }
+  function formatClock(seconds) {
+    const safe = Math.max(0, Math.floor(Number(seconds) || 0));
+    return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${String(safe % 60).padStart(2, '0')}`;
+  }
+  function unique(values) { return [...new Set(values.filter(Boolean))]; }
+  function safeImageSrc(value) {
+    const src = String(value || '').trim();
+    if (!src || /^javascript:/i.test(src)) return '';
+    if (/^(data:image\/|https?:\/\/|file:\/\/|\.\.?\/|\/)/i.test(src)) return src;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(src)) return src;
+    return '';
+  }
+  function normalizeImage(value, fallbackAlt = '') {
+    if (!value) return null;
+    const obj = typeof value === 'string' ? { src: value } : value;
+    const src = safeImageSrc(obj.src || obj.url || obj.data || '');
+    if (!src) return null;
+    return { src, alt: String(obj.alt || fallbackAlt || ''), caption: String(obj.caption || obj.title || '') };
+  }
+  function splitList(value) {
+    return Array.isArray(value) ? value.map(v => String(v).trim()).filter(Boolean) : String(value || '').split(/[|,;]+/).map(v => v.trim()).filter(Boolean);
+  }
+  function normalizeChart(value, raw = {}) {
+    const obj = value && typeof value === 'object' ? value : {};
+    const type = String(obj.type || raw.chart_type || raw.graph_type || '').toLowerCase();
+    if (!['bar','line'].includes(type)) return null;
+    const labels = splitList(obj.labels || raw.chart_labels || raw.graph_labels);
+    const values = (Array.isArray(obj.values) ? obj.values : splitList(obj.values || raw.chart_values || raw.graph_values)).map(Number);
+    if (!labels.length || labels.length !== values.length || values.some(v => !Number.isFinite(v))) return null;
+    return { type, title: String(obj.title || raw.chart_title || ''), labels, values, xLabel: String(obj.xLabel || obj.x_label || raw.chart_x_label || ''), yLabel: String(obj.yLabel || obj.y_label || raw.chart_y_label || '') };
+  }
+  function renderImageBlock(image) {
+    if (!image) return '';
+    const src = safeImageSrc(image.src);
+    if (!src) return '';
+    const caption = image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : '';
+    return `<figure class="media-card"><img src="${escapeHtml(src)}" alt="${escapeHtml(image.alt || '')}" loading="lazy">${caption}</figure>`;
+  }
+  function renderChartSvg(chart) {
+    if (!chart || !chart.labels?.length || chart.labels.length !== chart.values?.length) return '';
+    const width = 760, height = 390, left = 72, right = 28, top = chart.title ? 54 : 28, bottom = 76;
+    const plotW = width - left - right, plotH = height - top - bottom;
+    const minValue = Math.min(0, ...chart.values), maxValueRaw = Math.max(0, ...chart.values);
+    const maxValue = maxValueRaw === minValue ? minValue + 1 : maxValueRaw;
+    const y = v => top + (maxValue - v) / (maxValue - minValue) * plotH;
+    const zeroY = y(0);
+    const grid = Array.from({length:5}, (_,i) => {
+      const ratio=i/4, value=maxValue-(maxValue-minValue)*ratio, yy=top+plotH*ratio;
+      return `<line x1="${left}" y1="${yy}" x2="${width-right}" y2="${yy}" stroke="#dfe5ee"/><text x="${left-10}" y="${yy+4}" text-anchor="end" font-size="12" fill="#68758a">${escapeHtml(Number(value.toFixed(2)))}</text>`;
+    }).join('');
+    const title = chart.title ? `<text x="${width/2}" y="25" text-anchor="middle" font-size="17" font-weight="700" fill="#152033">${escapeHtml(chart.title)}</text>` : '';
+    const xLabel = chart.xLabel ? `<text x="${left+plotW/2}" y="${height-12}" text-anchor="middle" font-size="13" fill="#53616c">${escapeHtml(chart.xLabel)}</text>` : '';
+    const yLabel = chart.yLabel ? `<text transform="translate(17 ${top+plotH/2}) rotate(-90)" text-anchor="middle" font-size="13" fill="#53616c">${escapeHtml(chart.yLabel)}</text>` : '';
+    let marks='';
+    if (chart.type === 'bar') {
+      const slot=plotW/chart.values.length, barW=Math.max(12,Math.min(62,slot*.58));
+      marks=chart.values.map((value,i)=>{ const cx=left+slot*(i+.5), yy=y(value), barY=Math.min(yy,zeroY), h=Math.max(1,Math.abs(zeroY-yy)); return `<rect x="${cx-barW/2}" y="${barY}" width="${barW}" height="${h}" rx="3" fill="#3b82c4"/><text x="${cx}" y="${value>=0?barY-7:barY+h+17}" text-anchor="middle" font-size="12" fill="#152033">${escapeHtml(value)}</text><text x="${cx}" y="${height-bottom+22}" text-anchor="middle" font-size="12" fill="#53616c">${escapeHtml(chart.labels[i])}</text>`; }).join('');
+    } else {
+      const step=chart.values.length===1?0:plotW/(chart.values.length-1);
+      const points=chart.values.map((v,i)=>`${left+step*i},${y(v)}`).join(' ');
+      marks=`<polyline points="${points}" fill="none" stroke="#3b82c4" stroke-width="3"/>`+chart.values.map((value,i)=>{const cx=left+step*i, yy=y(value);return `<circle cx="${cx}" cy="${yy}" r="5" fill="#fff" stroke="#3b82c4" stroke-width="3"/><text x="${cx}" y="${yy-10}" text-anchor="middle" font-size="12" fill="#152033">${escapeHtml(value)}</text><text x="${cx}" y="${height-bottom+22}" text-anchor="middle" font-size="12" fill="#53616c">${escapeHtml(chart.labels[i])}</text>`}).join('');
+    }
+    return `<div class="media-card chart-card"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(chart.title || 'Question chart')}">${title}${grid}<line x1="${left}" y1="${zeroY}" x2="${width-right}" y2="${zeroY}" stroke="#7b8794"/>${marks}${xLabel}${yLabel}</svg></div>`;
+  }
+  function renderQuestionMedia(q, explanation = false) {
+    const image = explanation ? q.explanationImage : q.image;
+    const parts = [renderImageBlock(image)];
+    if (!explanation) parts.push(renderChartSvg(q.chart));
+    return parts.filter(Boolean).join('');
+  }
+  function sameAnswers(a, b) {
+    const x = [...a].sort();
+    const y = [...b].sort();
+    return x.length === y.length && x.every((v, i) => v === y[i]);
+  }
+  function shuffled(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function loadState() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      return parsed ? { ...clone(defaultState), ...parsed } : clone(defaultState);
+    } catch {
+      return clone(defaultState);
+    }
+  }
+  function supportsDirectFileStorage() {
+    return typeof window.showSaveFilePicker === 'function' && typeof window.showOpenFilePicker === 'function';
+  }
+  function projectFilePayload() {
+    return { app: 'MedQ Local', version: 3, storage: 'project-file', savedAt: new Date().toISOString(), data: state };
+  }
+  function updateStorageStatus(message = '') {
+    const box = $('fileStorageStatus');
+    if (!box) return;
+    const title = $('fileStorageStatusTitle');
+    const text = $('fileStorageStatusText');
+    const saveBtn = $('saveDataFileBtn');
+    const createBtn = $('createDataFileBtn');
+    const openBtn = $('openDataFileBtn');
+    const supported = supportsDirectFileStorage();
+    if (!supported) {
+      box.className = 'file-storage-status warning';
+      title.textContent = 'Direct file storage is unavailable in this browser';
+      text.textContent = 'Use a current Chromium-based browser, or continue using Export Full Backup.';
+      if (createBtn) createBtn.disabled = true;
+      if (openBtn) openBtn.disabled = true;
+      if (saveBtn) saveBtn.disabled = true;
+      return;
+    }
+    if (createBtn) createBtn.disabled = false;
+    if (openBtn) openBtn.disabled = false;
+    if (storageMode === 'file' && dataFileHandle) {
+      box.className = 'file-storage-status connected';
+      title.textContent = `Connected: ${dataFileName || 'MedQ project file'}`;
+      const saved = lastFileSaveAt ? ` Last saved ${lastFileSaveAt.toLocaleTimeString()}.` : '';
+      text.textContent = message || `Changes are automatically saved to this file.${saved}`;
+      if (saveBtn) saveBtn.disabled = false;
+    } else {
+      box.className = 'file-storage-status warning';
+      title.textContent = 'Browser storage is active';
+      text.textContent = message || 'Move the project to a local JSON file to avoid the browser storage limit.';
+      if (saveBtn) saveBtn.disabled = true;
+    }
+  }
+  async function writeProjectFile() {
+    if (!dataFileHandle) throw new Error('No project file is connected.');
+    const writable = await dataFileHandle.createWritable();
+    await writable.write(JSON.stringify(projectFilePayload(), null, 2));
+    await writable.close();
+    lastFileSaveAt = new Date();
+    fileWriteErrorShown = false;
+    updateStorageStatus();
+  }
+  function queueProjectFileSave() {
+    if (!dataFileHandle) return;
+    fileSaveQueue = fileSaveQueue
+      .catch(() => {})
+      .then(() => writeProjectFile())
+      .catch(error => {
+        console.error(error);
+        updateStorageStatus(`Could not save the file: ${error.message}`);
+        if (!fileWriteErrorShown) {
+          fileWriteErrorShown = true;
+          alert(`Could not save the connected data file. ${error.message}`);
+        }
+      });
+  }
+  function saveState() {
+    renderAll();
+    if (storageMode === 'file' && dataFileHandle) {
+      queueProjectFileSave();
+      return true;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateStorageStatus();
+      return true;
+    } catch (error) {
+      console.error(error);
+      updateStorageStatus('Browser storage is full. Move the project to a local file to continue saving.');
+      alert('The browser storage is full. Open Backup & Settings and choose “Move Current Data to File”.');
+      return false;
+    }
+  }
+  async function createProjectFile() {
+    if (!supportsDirectFileStorage()) return;
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: `medq-project-${new Date().toISOString().slice(0, 10)}.json`,
+        types: [{ description: 'MedQ project file', accept: { 'application/json': ['.json'] } }]
+      });
+      dataFileHandle = handle;
+      dataFileName = handle.name;
+      storageMode = 'file';
+      await writeProjectFile();
+      localStorage.removeItem(STORAGE_KEY);
+      updateStorageStatus('Current data was moved to the project file. Changes will be saved automatically.');
+      toast('Project file connected');
+    } catch (error) {
+      if (error?.name !== 'AbortError') alert(`Could not create the data file: ${error.message}`);
+    }
+  }
+  async function openProjectFile() {
+    if (!supportsDirectFileStorage()) return;
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{ description: 'MedQ project file', accept: { 'application/json': ['.json'] } }]
+      });
+      const file = await handle.getFile();
+      const parsed = JSON.parse(await file.text());
+      const data = parsed.data || parsed;
+      if (!Array.isArray(data.questions) || !Array.isArray(data.answers)) throw new Error('This is not a valid MedQ data file.');
+      if ((state.questions.length || state.answers.length) && !confirmAction('Open this project file and replace the data currently shown in the app?')) return;
+      state = { ...clone(defaultState), ...data };
+      dataFileHandle = handle;
+      dataFileName = handle.name;
+      storageMode = 'file';
+      lastFileSaveAt = new Date(file.lastModified || Date.now());
+      localStorage.removeItem(STORAGE_KEY);
+      renderAll();
+      updateStorageStatus('Project file opened. Future changes will be saved automatically.');
+      showView('home');
+      toast('Project file opened');
+    } catch (error) {
+      if (error?.name !== 'AbortError') alert(`Could not open the data file: ${error.message}`);
+    }
+  }
+  function toast(message) {
+    const el = $('toast');
+    el.textContent = message;
+    el.classList.remove('hidden');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.add('hidden'), 2200);
+  }
+  function confirmAction(message) { return window.confirm(message); }
+
+  function programmeSettings() {
+    const settings = state.settings || {};
+    return {
+      title: String(settings.programmeTitle || 'Medical student years').trim() || 'Medical student years',
+      subtitle: String(settings.programmeSubtitle ?? '1–3').trim()
+    };
+  }
+  function renderProgrammeLabels() {
+    state.settings = state.settings || {};
+    const programme = programmeSettings();
+    if ($('programmeTitleDisplay')) $('programmeTitleDisplay').textContent = programme.title;
+    if ($('programmeSubtitleDisplay')) {
+      $('programmeSubtitleDisplay').textContent = programme.subtitle;
+      $('programmeSubtitleDisplay').classList.toggle('hidden', !programme.subtitle);
+    }
+    if ($('homeProgrammeDisplay')) $('homeProgrammeDisplay').textContent = [programme.title, programme.subtitle].filter(Boolean).join(' ');
+    if ($('programmeTitleInput')) $('programmeTitleInput').value = programme.title;
+    if ($('programmeSubtitleInput')) $('programmeSubtitleInput').value = programme.subtitle;
+  }
+  function applySidebarState() {
+    state.settings = state.settings || {};
+    const collapsed = state.settings.sidebarCollapsed === true;
+    const shell = document.querySelector('.app-shell');
+    if (shell) shell.classList.toggle('sidebar-collapsed', collapsed);
+    if ($('sidebarToggleBtn')) {
+      $('sidebarToggleBtn').setAttribute('aria-label', collapsed ? 'Show sidebar' : 'Hide sidebar');
+      $('sidebarToggleBtn').title = collapsed ? 'Show sidebar' : 'Hide sidebar';
+      $('sidebarToggleBtn').textContent = collapsed ? '☰' : '‹';
+    }
+    if ($('sidebarReopenBtn')) $('sidebarReopenBtn').setAttribute('aria-hidden', collapsed ? 'false' : 'true');
+  }
+  function setSidebarCollapsed(collapsed, persist = true) {
+    state.settings = state.settings || {};
+    state.settings.sidebarCollapsed = Boolean(collapsed);
+    applySidebarState();
+    if (persist) saveState();
+  }
+  function toggleSidebar() {
+    setSidebarCollapsed(!(state.settings && state.settings.sidebarCollapsed === true));
+  }
+  function saveProgrammeLabel() {
+    state.settings = state.settings || {};
+    const title = $('programmeTitleInput').value.trim();
+    const subtitle = $('programmeSubtitleInput').value.trim();
+    state.settings.programmeTitle = title || 'Medical student years';
+    state.settings.programmeSubtitle = subtitle;
+    saveState();
+    toast('Course label saved');
+  }
+
+  function showView(name) {
+    const main = document.querySelector('.main-content');
+    main.classList.toggle('home-active', name === 'home');
+    main.classList.toggle('quiz-active', name === 'quiz');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const target = $(`view-${name}`);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
+    const [title, subtitle] = pageMeta[name] || ['', ''];
+    $('pageTitle').textContent = title;
+    $('pageSubtitle').textContent = subtitle;
+    if (name === 'quiz') applyQuizDisplaySettings();
+    if (name !== 'quiz') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function normalizeQuestion(raw, index = 0) {
+    const options = normalizeOptions(raw.options || raw.choices || raw.answers || raw);
+    const answerSource = raw.answer ?? raw.correct_answer ?? raw.correctAnswers ?? raw.correct ?? '';
+    const answer = Array.isArray(answerSource)
+      ? answerSource.map(v => String(v).trim().toUpperCase()).filter(Boolean)
+      : String(answerSource).split(/[|,;/]+/).map(v => v.trim().toUpperCase()).filter(Boolean);
+    const references = Array.isArray(raw.references)
+      ? raw.references.map(String)
+      : raw.reference || raw.source || raw.references
+        ? String(raw.reference || raw.source || raw.references).split(/\s*\|\s*/).filter(Boolean)
+        : [];
+    const tags = Array.isArray(raw.tags)
+      ? raw.tags.map(String)
+      : raw.tags ? String(raw.tags).split(/[|,;/]+/).map(v => v.trim()).filter(Boolean) : [];
+    const question = String(raw.question || raw.stem || raw.prompt || raw.title || '').trim();
+    return {
+      id: String(raw.id || raw.question_id || raw.number || `Q-${Date.now()}-${index + 1}`).trim(),
+      question,
+      options,
+      answer,
+      explanation: String(raw.explanation || raw.rationale || raw.analysis || '').trim(),
+      references,
+      subject: String(raw.subject || raw.chapter || raw.category || 'Uncategorized').trim() || 'Uncategorized',
+      tags,
+      image: normalizeImage(typeof (raw.image || raw.question_image || raw.image_url || (raw.media && raw.media.image)) === 'string' ? { src: raw.image || raw.question_image || raw.image_url || (raw.media && raw.media.image), alt: raw.image_alt || raw.question_image_alt || '', caption: raw.image_caption || raw.question_image_caption || '' } : (raw.image || raw.question_image || raw.image_url || (raw.media && raw.media.image)), raw.image_alt || raw.question_image_alt),
+      explanationImage: normalizeImage(typeof (raw.explanationImage || raw.explanation_image || raw.explanation_image_url || (raw.media && raw.media.explanationImage)) === 'string' ? { src: raw.explanationImage || raw.explanation_image || raw.explanation_image_url || (raw.media && raw.media.explanationImage), alt: raw.explanation_image_alt || '', caption: raw.explanation_image_caption || '' } : (raw.explanationImage || raw.explanation_image || raw.explanation_image_url || (raw.media && raw.media.explanationImage)), raw.explanation_image_alt),
+      chart: normalizeChart(raw.chart || raw.graph, raw),
+      originalId: String(raw.originalId || raw.original_id || raw.id || raw.question_id || raw.number || '').trim(),
+      importSource: String(raw.importSource || raw.import_source || '').trim(),
+      importSourceId: String(raw.importSourceId || raw.import_source_id || '').trim(),
+      createdAt: raw.createdAt || new Date().toISOString()
+    };
+  }
+
+  function normalizeOptions(input) {
+    if (Array.isArray(input)) {
+      const result = {};
+      input.forEach((v, i) => {
+        const key = String.fromCharCode(65 + i);
+        result[key] = typeof v === 'object' ? String(v.text || v.content || v.label || '') : String(v);
+      });
+      return result;
+    }
+    if (input && typeof input === 'object' && !('question' in input)) {
+      const result = {};
+      Object.entries(input).forEach(([k, v]) => {
+        if (/^[A-Za-z]$/.test(k)) result[k.toUpperCase()] = typeof v === 'object' ? String(v.text || v.content || v.label || '') : String(v);
+      });
+      if (Object.keys(result).length) return result;
+    }
+    const result = {};
+    ['a','b','c','d','e','f'].forEach(k => {
+      const value = input?.[`option_${k}`] ?? input?.[`option${k.toUpperCase()}`] ?? input?.[k.toUpperCase()];
+      if (value !== undefined && String(value).trim()) result[k.toUpperCase()] = String(value).trim();
+    });
+    return result;
+  }
+
+  function validateQuestion(q, index) {
+    const errors = [];
+    if (!q.question) errors.push(`Question ${index + 1} is missing question text`);
+    if (Object.keys(q.options).length < 2) errors.push(`Question ${index + 1} needs at least 2 options`);
+    if (!q.answer.length) errors.push(`Question ${index + 1} is missing the correct answer`);
+    if (q.answer.some(a => !Object.prototype.hasOwnProperty.call(q.options, a))) errors.push(`Question ${index + 1} has a correct answer that is not in its options`);
+    return errors;
+  }
+
+  function parseJson(text) {
+    const parsed = JSON.parse(text);
+    const list = Array.isArray(parsed) ? parsed : parsed.questions || [];
+    return list.map(normalizeQuestion);
+  }
+
+  function parseCsv(text) {
+    const rows = [];
+    let row = [], cell = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (ch === '"') {
+        if (inQuotes && text[i + 1] === '"') { cell += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (ch === ',' && !inQuotes) { row.push(cell); cell = ''; }
+      else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); cell = '';
+        if (row.some(v => v.trim() !== '')) rows.push(row);
+        row = [];
+      } else cell += ch;
+    }
+    if (cell.length || row.length) { row.push(cell); rows.push(row); }
+    if (rows.length < 2) return [];
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map((r, index) => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] ?? '');
+      return normalizeQuestion(obj, index);
+    });
+  }
+
+  function parseMarkdown(text) {
+    const blocks = text.split(/^---\s*$/m).map(v => v.trim()).filter(Boolean);
+    return blocks.map((block, index) => {
+      const lines = block.split(/\r?\n/);
+      const raw = { options: {}, tags: [], references: [] };
+      let section = '';
+      const freeQuestion = [];
+      for (const original of lines) {
+        const line = original.trim();
+        if (!line) continue;
+        const heading = line.match(/^#{1,6}\s*(.+)$/);
+        if (heading && !raw.id) { raw.id = heading[1].trim(); continue; }
+        let match;
+        if ((match = line.match(/^(?:question|題目|題幹)\s*[:：]\s*(.*)$/i))) { raw.question = match[1]; section = 'question'; continue; }
+        if ((match = line.match(/^([A-F])\s*[\.、\)]\s*(.+)$/i))) { raw.options[match[1].toUpperCase()] = match[2]; section = ''; continue; }
+        if ((match = line.match(/^(?:answer|答案)\s*[:：]\s*(.*)$/i))) { raw.answer = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:explanation|解析)\s*[:：]\s*(.*)$/i))) { raw.explanation = match[1]; section = 'explanation'; continue; }
+        if ((match = line.match(/^(?:references?|資料來源|來源)\s*[:：]\s*(.*)$/i))) { raw.references = match[1].split('|').map(v => v.trim()).filter(Boolean); section = ''; continue; }
+        if ((match = line.match(/^(?:subject|科目|章節)\s*[:：]\s*(.*)$/i))) { raw.subject = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:tags?|標籤)\s*[:：]\s*(.*)$/i))) { raw.tags = match[1].split(/[|,;/]+/).map(v => v.trim()).filter(Boolean); section = ''; continue; }
+        if ((match = line.match(/^(?:image|question image|圖片)\s*[:：]\s*(.*)$/i))) { raw.image = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:image alt|圖片說明)\s*[:：]\s*(.*)$/i))) { raw.image_alt = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:image caption|圖片標題)\s*[:：]\s*(.*)$/i))) { raw.image_caption = match[1]; if (raw.image && typeof raw.image === 'string') raw.image = {src:raw.image, caption:match[1], alt:raw.image_alt||''}; section = ''; continue; }
+        if ((match = line.match(/^(?:chart type|graph type|圖表類型)\s*[:：]\s*(.*)$/i))) { raw.chart_type = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:chart title|graph title|圖表標題)\s*[:：]\s*(.*)$/i))) { raw.chart_title = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:chart labels|graph labels|圖表標籤)\s*[:：]\s*(.*)$/i))) { raw.chart_labels = match[1]; section = ''; continue; }
+        if ((match = line.match(/^(?:chart values|graph values|圖表數值)\s*[:：]\s*(.*)$/i))) { raw.chart_values = match[1]; section = ''; continue; }
+        if (section === 'explanation') raw.explanation = `${raw.explanation || ''}\n${line}`.trim();
+        else if (section === 'question') raw.question = `${raw.question || ''}\n${line}`.trim();
+        else freeQuestion.push(line);
+      }
+      if (!raw.question && freeQuestion.length) raw.question = freeQuestion.join('\n');
+      return normalizeQuestion(raw, index);
+    });
+  }
+
+  function parseByExtension(filename, text) {
+    const ext = filename.toLowerCase().split('.').pop();
+    if (ext === 'json') return parseJson(text);
+    if (ext === 'csv') return parseCsv(text);
+    return parseMarkdown(text);
+  }
+
+  function stableShortHash(value) {
+    let hash = 2166136261;
+    const input = String(value || '');
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36).toUpperCase();
+  }
+
+  function importSourceKey(sourceName, sourceId) {
+    const base = String(sourceName || 'QUESTION-BANK')
+      .replace(/\.[^.]+$/, '')
+      .normalize('NFKD')
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toUpperCase();
+    const compact = (base || 'QUESTION-BANK').split('-').filter(Boolean).slice(0, 5).join('-').slice(0, 42);
+    return `${compact}-${stableShortHash(sourceId || sourceName).slice(0, 6)}`;
+  }
+
+  function prepareImportQuestions(list, source = {}) {
+    const sourceName = String(source.name || 'Imported questions');
+    const sourceId = String(source.id || sourceName);
+    const sourceKey = importSourceKey(sourceName, sourceId);
+    const usedIds = new Set(state.questions.map(q => String(q.id)));
+    const sameSourceByOriginalId = new Map();
+    state.questions.forEach(q => {
+      if (q.importSourceId === sourceId && q.originalId && !sameSourceByOriginalId.has(q.originalId)) {
+        sameSourceByOriginalId.set(String(q.originalId), String(q.id));
+      }
+    });
+    const incomingOccurrences = new Map();
+    let renamed = 0;
+    let updates = 0;
+
+    const prepared = list.map((question, index) => {
+      const originalId = String(question.originalId || question.id || `Q-${index + 1}`).trim() || `Q-${index + 1}`;
+      const occurrence = (incomingOccurrences.get(originalId) || 0) + 1;
+      incomingOccurrences.set(originalId, occurrence);
+      let finalId = originalId;
+
+      if (occurrence === 1 && sameSourceByOriginalId.has(originalId)) {
+        finalId = sameSourceByOriginalId.get(originalId);
+        updates++;
+      } else if (usedIds.has(finalId)) {
+        const safeOriginal = originalId.replace(/\s+/g, '-').slice(0, 80) || `Q-${index + 1}`;
+        const base = `${sourceKey}-${safeOriginal}`;
+        finalId = base;
+        let suffix = 2;
+        while (usedIds.has(finalId)) finalId = `${base}-${suffix++}`;
+        renamed++;
+      }
+
+      usedIds.add(finalId);
+      return {
+        ...question,
+        id: finalId,
+        originalId,
+        importSource: sourceName,
+        importSourceId: sourceId
+      };
+    });
+
+    importMeta = { sourceName, total: prepared.length, renamed, updates };
+    return prepared;
+  }
+
+  function handleImportFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = parseByExtension(file.name, String(reader.result || ''));
+        const sourceId = `${file.name}|${file.size}|${file.lastModified}`;
+        importBuffer = prepareImportQuestions(parsed, { name: file.name, id: sourceId });
+        showImportPreview(importBuffer);
+      } catch (error) {
+        importBuffer = [];
+        importMeta = { sourceName: file.name, total: 0, renamed: 0, updates: 0 };
+        showImportPreview([], [`Could not parse file: ${error.message}`]);
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  function showImportPreview(list, extraErrors = []) {
+    const errors = [...extraErrors];
+    list.forEach((q, i) => errors.push(...validateQuestion(q, i)));
+    $('importPreviewPanel').classList.remove('hidden');
+    const conflictNote = importMeta.renamed ? `; ${importMeta.renamed} duplicate ID(s) will be renamed automatically` : '';
+    const updateNote = importMeta.updates ? `; ${importMeta.updates} question(s) from this same file will be updated` : '';
+    $('importSummary').textContent = `Read ${list.length} question(s); ${errors.length ? `found ${errors.length} issue(s)` : 'format is valid'}${conflictNote}${updateNote}`;
+    $('importErrors').classList.toggle('hidden', errors.length === 0);
+    $('importErrors').innerHTML = errors.map(e => `<div>${escapeHtml(e)}</div>`).join('');
+    $('confirmImportBtn').disabled = !list.length || errors.length > 0;
+    $('importPreview').innerHTML = list.slice(0, 20).map((q, i) => `
+      <div class="preview-item">
+        <h4>${escapeHtml(q.id)} · ${escapeHtml(q.subject)}</h4>
+        <p>${escapeHtml(q.question)}</p>
+        <small>${Object.keys(q.options).length} options · Answer: ${escapeHtml(q.answer.join(', '))}${q.image ? ' · Image' : ''}${q.chart ? ' · Chart' : ''}</small>
+      </div>`).join('') || '<div class="empty-state">No questions available to import</div>';
+  }
+
+  function confirmImport() {
+    const existingById = new Map(state.questions.map(q => [q.id, q]));
+    let added = 0, updated = 0;
+    importBuffer.forEach(q => {
+      if (existingById.has(q.id)) { existingById.set(q.id, q); updated++; }
+      else { existingById.set(q.id, q); added++; }
+    });
+    state.questions = [...existingById.values()];
+    const renamed = importMeta.renamed;
+    importBuffer = [];
+    importMeta = { sourceName: '', total: 0, renamed: 0, updates: 0 };
+    $('importPreviewPanel').classList.add('hidden');
+    saveState();
+    toast(`Import complete: ${added} added, ${updated} updated${renamed ? `, ${renamed} IDs renamed` : ''}`);
+    showView('questions');
+  }
+
+  function getQuestionById(id) { return state.questions.find(q => q.id === id); }
+  function getQuestionStats(questionId) {
+    const rows = state.answers.filter(a => a.questionId === questionId);
+    return {
+      attempts: rows.length,
+      correct: rows.filter(a => a.isCorrect).length,
+      wrong: rows.filter(a => !a.isCorrect).length,
+      avgTime: rows.length ? rows.reduce((s, a) => s + a.elapsedSeconds, 0) / rows.length : 0
+    };
+  }
+
+  function buildQuizPool(config) {
+    let pool = [...state.questions];
+    if (Array.isArray(config.questionIds)) {
+      const selectedIds = new Set(config.questionIds);
+      pool = pool.filter(q => selectedIds.has(q.id));
+    } else if (Array.isArray(config.subjects) && config.subjects.length) pool = pool.filter(q => config.subjects.includes(q.subject));
+    else if (config.subject) pool = pool.filter(q => q.subject === config.subject);
+    if (config.tag) pool = pool.filter(q => q.tags.includes(config.tag));
+    if (config.source === 'wrong') pool = pool.filter(q => (state.wrongCounts[q.id] || 0) > 0);
+    if (config.source === 'bookmarked') pool = pool.filter(q => state.bookmarks.includes(q.id));
+    if (config.shuffleQuestions) pool = shuffled(pool);
+    return pool.slice(0, Math.min(config.count, pool.length));
+  }
+
+  function startQuiz(config) {
+    const questions = buildQuizPool(config).map(q => {
+      const copy = clone(q);
+      if (config.shuffleOptions) {
+        const entries = shuffled(Object.entries(copy.options));
+        const map = {};
+        entries.forEach(([key, value]) => map[key] = value);
+        copy.options = map;
+      }
+      return copy;
+    });
+    if (!questions.length) {
+      const msg = 'No questions match these filters. Select another subject or import questions first.';
+      if ($('quizSetupMessage')) { $('quizSetupMessage').textContent = msg; $('quizSetupMessage').classList.remove('hidden'); }
+      toast(msg);
+      return;
+    }
+    $('quizSetupMessage').classList.add('hidden');
+    currentQuiz = {
+      id: uid('session'),
+      mode: config.mode,
+      config,
+      questions,
+      currentIndex: 0,
+      answers: [],
+      selected: [],
+      drafts: {},
+      skippedIndices: [],
+      submitted: false,
+      startedAt: Date.now(),
+      questionStartedAt: Date.now(),
+      totalSeconds: config.mode === 'exam' ? config.duration * 60 : null,
+      finished: false
+    };
+    showView('quiz');
+    renderQuizQuestion();
+    startTimer();
+  }
+
+  const QUIZ_WIDTHS = { narrow: '700px', standard: '840px', wide: '1040px' };
+  function getQuizDisplaySettings() {
+    state.settings = state.settings || {};
+    const scale = Math.min(1.25, Math.max(0.75, Number(state.settings.quizFontScale) || 0.9));
+    const width = Object.prototype.hasOwnProperty.call(QUIZ_WIDTHS, state.settings.quizWidth) ? state.settings.quizWidth : 'standard';
+    const density = state.settings.quizDensity === 'comfortable' ? 'comfortable' : 'compact';
+    const sidebar = state.settings.quizSidebar !== false;
+    return { scale, width, density, sidebar };
+  }
+  function applyQuizDisplaySettings() {
+    const settings = getQuizDisplaySettings();
+    document.documentElement.style.setProperty('--quiz-font-scale', settings.scale.toFixed(2));
+    document.documentElement.style.setProperty('--quiz-main-width', QUIZ_WIDTHS[settings.width]);
+    const view = $('view-quiz');
+    if (view) {
+      view.classList.toggle('quiz-density-compact', settings.density === 'compact');
+      view.classList.toggle('hide-quiz-sidebar', !settings.sidebar);
+    }
+    if ($('quizTextSizeLabel')) $('quizTextSizeLabel').textContent = `${Math.round(settings.scale * 100)}%`;
+    if ($('quizWidthSelect')) $('quizWidthSelect').value = settings.width;
+    if ($('quizDensityBtn')) {
+      $('quizDensityBtn').textContent = settings.density === 'compact' ? 'Compact' : 'Comfortable';
+      $('quizDensityBtn').classList.toggle('active', settings.density === 'compact');
+    }
+    if ($('quizSidebarBtn')) {
+      $('quizSidebarBtn').textContent = settings.sidebar ? 'Navigator' : 'No navigator';
+      $('quizSidebarBtn').classList.toggle('active', settings.sidebar);
+    }
+  }
+  function changeQuizDisplay(changes) {
+    state.settings = { ...(state.settings || {}), ...changes };
+    applyQuizDisplaySettings();
+    saveState();
+  }
+  function getQuizAnswer(index) {
+    if (!currentQuiz) return null;
+    const question = currentQuiz.questions[index];
+    if (!question) return null;
+    return currentQuiz.answers.find(answer => answer.questionIndex === index || answer.questionId === question.id) || null;
+  }
+
+  function getNextUnansweredIndex(afterIndex) {
+    if (!currentQuiz || currentQuiz.questions.length < 2) return null;
+    for (let step = 1; step < currentQuiz.questions.length; step++) {
+      const index = (afterIndex + step) % currentQuiz.questions.length;
+      if (!getQuizAnswer(index)) return index;
+    }
+    return null;
+  }
+
+  function goToQuizQuestion(index) {
+    if (!currentQuiz || index < 0 || index >= currentQuiz.questions.length) return;
+    currentQuiz.currentIndex = index;
+    renderQuizQuestion();
+  }
+
+  function renderQuizNavigator() {
+    if (!currentQuiz || !$('quizQuestionNavigator')) return;
+    const answered = currentQuiz.answers.length;
+    const correct = currentQuiz.answers.filter(answer => answer.isCorrect).length;
+    const skipped = new Set(currentQuiz.skippedIndices || []).size;
+    const score = answered ? Math.round(correct / answered * 100) : 0;
+    $('quizLiveScore').textContent = `${score}%`;
+    $('quizAnsweredSummary').textContent = skipped ? `${answered} answered · ${skipped} skipped` : `${answered} answered`;
+    $('quizCorrectSummary').textContent = `${correct} correct`;
+    $('quizQuestionNavigator').innerHTML = currentQuiz.questions.map((question, index) => {
+      const answer = getQuizAnswer(index);
+      const classes = ['quiz-nav-number'];
+      if (answer) classes.push(answer.isCorrect ? 'correct' : 'wrong');
+      else if ((currentQuiz.skippedIndices || []).includes(index)) classes.push('skipped');
+      if (index === currentQuiz.currentIndex) classes.push('current');
+      const status = answer ? (answer.isCorrect ? 'correct' : 'incorrect') : ((currentQuiz.skippedIndices || []).includes(index) ? 'skipped' : 'not answered');
+      return `<button type="button" class="${classes.join(' ')}" data-quiz-jump="${index}" title="Question ${index + 1}: ${status}">${index + 1}</button>`;
+    }).join('');
+    document.querySelectorAll('[data-quiz-jump]').forEach(button => button.onclick = () => goToQuizQuestion(Number(button.dataset.quizJump)));
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (!currentQuiz || currentQuiz.finished) return;
+      if (currentQuiz.mode === 'exam') {
+        const elapsed = Math.floor((Date.now() - currentQuiz.startedAt) / 1000);
+        const remaining = currentQuiz.totalSeconds - elapsed;
+        $('timerLabel').textContent = 'Time Remaining';
+        $('quizTimer').textContent = formatClock(remaining);
+        if (remaining <= 0) finishQuiz(true);
+      } else {
+        const recorded = getQuizAnswer(currentQuiz.currentIndex);
+        if (recorded) {
+          $('timerLabel').textContent = 'Answered in';
+          $('quizTimer').textContent = formatClock(recorded.elapsedSeconds);
+        } else {
+          const elapsed = Math.floor((Date.now() - currentQuiz.questionStartedAt) / 1000);
+          $('timerLabel').textContent = 'Time on Question';
+          $('quizTimer').textContent = formatClock(elapsed);
+        }
+      }
+    }, 250);
+  }
+
+  function renderAnswerFeedback(question, answerRecord) {
+    if (!answerRecord) return;
+    const refs = question.references.length ? `<p><strong>References:</strong> ${question.references.map(escapeHtml).join(' · ')}</p>` : '';
+    const explanationMedia = renderQuestionMedia(question, true);
+    $('answerFeedback').className = `feedback ${answerRecord.isCorrect ? 'correct' : 'wrong'}`;
+    $('answerFeedback').innerHTML = `
+      <h4>${answerRecord.isCorrect ? 'Correct' : `Incorrect. Correct answer: ${escapeHtml(question.answer.join(', '))}`}</h4>
+      <p>${escapeHtml(question.explanation || 'No explanation has been provided for this question.')}</p>${explanationMedia}${refs}
+      <p><strong>Time spent:</strong> ${formatSeconds(answerRecord.elapsedSeconds)}</p>`;
+  }
+
+  function renderQuizQuestion() {
+    if (!currentQuiz) return;
+    const index = currentQuiz.currentIndex;
+    const q = currentQuiz.questions[index];
+    const existingAnswer = getQuizAnswer(index);
+    const draft = currentQuiz.drafts && Array.isArray(currentQuiz.drafts[index]) ? currentQuiz.drafts[index] : [];
+    currentQuiz.selected = existingAnswer ? [...existingAnswer.selectedAnswers] : [...draft];
+    currentQuiz.submitted = Boolean(existingAnswer);
+    currentQuiz.questionStartedAt = Date.now();
+    $('quizProgressLabel').textContent = `Question ${index + 1} of ${currentQuiz.questions.length}`;
+    $('quizProgressBar').style.width = `${((index + 1) / currentQuiz.questions.length) * 100}%`;
+    $('questionSubject').textContent = q.subject || 'Uncategorized';
+    $('questionTags').innerHTML = q.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+    $('questionText').textContent = q.question;
+    const mediaHtml = renderQuestionMedia(q, false);
+    $('questionMedia').innerHTML = mediaHtml;
+    $('questionMedia').classList.toggle('hidden', !mediaHtml);
+    const multi = q.answer.length > 1;
+    $('answerOptions').innerHTML = Object.entries(q.options).map(([key, value]) => {
+      const classes = ['option-button'];
+      if (existingAnswer) {
+        if (q.answer.includes(key)) classes.push('correct');
+        else if (existingAnswer.selectedAnswers.includes(key)) classes.push('wrong');
+      } else if (currentQuiz.selected.includes(key)) classes.push('selected');
+      return `<button class="${classes.join(' ')}" data-option="${escapeHtml(key)}" ${existingAnswer ? 'disabled' : ''}>
+        <span class="option-key">${escapeHtml(key)}</span><span>${escapeHtml(value)}</span>
+      </button>`;
+    }).join('');
+    if (!existingAnswer) document.querySelectorAll('.option-button').forEach(btn => btn.addEventListener('click', () => selectOption(btn.dataset.option, multi)));
+    $('answerFeedback').className = 'feedback hidden';
+    $('answerFeedback').innerHTML = '';
+    if (existingAnswer) renderAnswerFeedback(q, existingAnswer);
+    $('previousQuestionBtn').disabled = index === 0;
+    $('submitAnswerBtn').classList.toggle('hidden', Boolean(existingAnswer));
+    $('skipQuestionBtn').classList.toggle('hidden', Boolean(existingAnswer));
+    $('nextQuestionBtn').classList.toggle('hidden', !existingAnswer);
+    $('submitAnswerBtn').disabled = currentQuiz.selected.length === 0;
+    $('skipQuestionBtn').textContent = index === currentQuiz.questions.length - 1 ? 'Skip / Find next ›' : 'Skip ›';
+    if (existingAnswer) $('nextQuestionBtn').textContent = getNextUnansweredIndex(index) === null ? 'View Results' : 'Next Question';
+    updateBookmarkButton();
+    renderQuizNavigator();
+  }
+
+  function selectOption(key, multi) {
+    if (!currentQuiz || currentQuiz.submitted) return;
+    if (multi) {
+      currentQuiz.selected = currentQuiz.selected.includes(key)
+        ? currentQuiz.selected.filter(v => v !== key)
+        : [...currentQuiz.selected, key];
+    } else currentQuiz.selected = [key];
+    currentQuiz.drafts = currentQuiz.drafts || {};
+    currentQuiz.drafts[currentQuiz.currentIndex] = [...currentQuiz.selected];
+    document.querySelectorAll('.option-button').forEach(btn => btn.classList.toggle('selected', currentQuiz.selected.includes(btn.dataset.option)));
+    $('submitAnswerBtn').disabled = currentQuiz.selected.length === 0;
+  }
+
+  function submitCurrentAnswer() {
+    if (!currentQuiz || currentQuiz.submitted || !currentQuiz.selected.length) return;
+    const q = currentQuiz.questions[currentQuiz.currentIndex];
+    const elapsedSeconds = Math.max(1, Math.round((Date.now() - currentQuiz.questionStartedAt) / 1000));
+    const isCorrect = sameAnswers(currentQuiz.selected, q.answer);
+    const answerRecord = {
+      id: uid('answer'),
+      sessionId: currentQuiz.id,
+      questionId: q.id,
+      questionIndex: currentQuiz.currentIndex,
+      selectedAnswers: [...currentQuiz.selected],
+      correctAnswers: [...q.answer],
+      isCorrect,
+      elapsedSeconds,
+      answeredAt: new Date().toISOString(),
+      mode: currentQuiz.mode
+    };
+    currentQuiz.answers.push(answerRecord);
+    currentQuiz.submitted = true;
+    currentQuiz.skippedIndices = (currentQuiz.skippedIndices || []).filter(index => index !== currentQuiz.currentIndex);
+    if (currentQuiz.drafts) delete currentQuiz.drafts[currentQuiz.currentIndex];
+    state.answers.push(answerRecord);
+    if (!isCorrect) state.wrongCounts[q.id] = (state.wrongCounts[q.id] || 0) + 1;
+    saveState();
+
+    document.querySelectorAll('.option-button').forEach(btn => {
+      const key = btn.dataset.option;
+      btn.classList.remove('selected');
+      if (q.answer.includes(key)) btn.classList.add('correct');
+      else if (currentQuiz.selected.includes(key)) btn.classList.add('wrong');
+      btn.disabled = true;
+    });
+    renderAnswerFeedback(q, answerRecord);
+    $('submitAnswerBtn').classList.add('hidden');
+    $('skipQuestionBtn').classList.add('hidden');
+    $('nextQuestionBtn').classList.remove('hidden');
+    $('nextQuestionBtn').textContent = getNextUnansweredIndex(currentQuiz.currentIndex) === null ? 'View Results' : 'Next Question';
+    renderQuizNavigator();
+  }
+
+  function previousQuestion() {
+    if (!currentQuiz || currentQuiz.currentIndex <= 0) return;
+    goToQuizQuestion(currentQuiz.currentIndex - 1);
+  }
+
+  function skipQuestion() {
+    if (!currentQuiz || getQuizAnswer(currentQuiz.currentIndex)) return nextQuestion();
+    currentQuiz.skippedIndices = unique([...(currentQuiz.skippedIndices || []), currentQuiz.currentIndex]);
+    const nextIndex = getNextUnansweredIndex(currentQuiz.currentIndex);
+    if (nextIndex === null) {
+      renderQuizNavigator();
+      toast('This is the only unanswered question left. Use End Quiz to finish, or answer it now.');
+      return;
+    }
+    goToQuizQuestion(nextIndex);
+  }
+
+  function nextQuestion() {
+    if (!currentQuiz || !getQuizAnswer(currentQuiz.currentIndex)) return;
+    const nextIndex = getNextUnansweredIndex(currentQuiz.currentIndex);
+    if (nextIndex === null) finishQuiz(false);
+    else goToQuizQuestion(nextIndex);
+  }
+
+  function finishQuiz(timedOut = false) {
+    if (!currentQuiz || currentQuiz.finished) return;
+    currentQuiz.finished = true;
+    clearInterval(timerInterval);
+    const session = {
+      id: currentQuiz.id,
+      mode: currentQuiz.mode,
+      questionIds: currentQuiz.questions.map(q => q.id),
+      answerIds: currentQuiz.answers.map(a => a.id),
+      startedAt: new Date(currentQuiz.startedAt).toISOString(),
+      finishedAt: new Date().toISOString(),
+      timedOut,
+      correctCount: currentQuiz.answers.filter(a => a.isCorrect).length,
+      answeredCount: currentQuiz.answers.length,
+      totalCount: currentQuiz.questions.length,
+      config: clone(currentQuiz.config || {})
+    };
+    state.sessions.push(session);
+    saveState();
+    renderResults();
+    showView('results');
+  }
+
+  function renderResults() {
+    if (!currentQuiz) return;
+    const total = currentQuiz.questions.length;
+    const answered = currentQuiz.answers.length;
+    const correct = currentQuiz.answers.filter(a => a.isCorrect).length;
+    const score = total ? Math.round((correct / total) * 100) : 0;
+    const avg = answered ? currentQuiz.answers.reduce((s, a) => s + a.elapsedSeconds, 0) / answered : 0;
+    $('resultHeadline').textContent = score >= 80 ? 'Great work!' : score >= 60 ? 'Complete. Keep building your skills.' : 'Complete. Review your missed questions next.';
+    $('resultScore').textContent = `${score}%`;
+    $('resultCorrect').textContent = `${correct} / ${total}`;
+    $('resultAvgTime').textContent = formatSeconds(avg);
+    $('resultDetails').innerHTML = currentQuiz.questions.map((q, index) => {
+      const a = currentQuiz.answers.find(row => row.questionId === q.id);
+      return `<div class="list-item">
+        <h4>${index + 1}. ${escapeHtml(q.question)}</h4>
+        <p>${a ? (a.isCorrect ? '✓ Correct' : `✕ Incorrect; your answer: ${escapeHtml(a.selectedAnswers.join(', '))}; correct answer: ${escapeHtml(q.answer.join(', '))}`) : 'Not answered'}</p>
+        <div class="item-meta"><span class="chip">${escapeHtml(q.subject)}</span>${q.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleBookmark(questionId) {
+    if (state.bookmarks.includes(questionId)) state.bookmarks = state.bookmarks.filter(id => id !== questionId);
+    else state.bookmarks.push(questionId);
+    saveState();
+    updateBookmarkButton();
+    toast(state.bookmarks.includes(questionId) ? 'Bookmark added' : 'Bookmark removed');
+  }
+  function updateBookmarkButton() {
+    if (!currentQuiz) return;
+    const q = currentQuiz.questions[currentQuiz.currentIndex];
+    $('bookmarkCurrentBtn').textContent = state.bookmarks.includes(q.id) ? '★ Bookmarked' : '☆ Bookmark';
+  }
+
+  function getSelectedSubjects() {
+    const all = unique(state.questions.map(q => q.subject)).sort();
+    const saved = state.settings && Array.isArray(state.settings.selectedSubjects) ? state.settings.selectedSubjects : null;
+    return saved === null ? all : saved.filter(subject => all.includes(subject));
+  }
+
+  function subtopicKey(subject, tag) { return `${subject}\u0000${tag}`; }
+  function parseSubtopicKey(key) { const i=String(key).indexOf('\u0000'); return i<0?null:{subject:String(key).slice(0,i),tag:String(key).slice(i+1)}; }
+  function getSelectedSubtopics() {
+    const saved = state.settings && Array.isArray(state.settings.selectedSubtopics) ? state.settings.selectedSubtopics : [];
+    const valid = new Set(state.questions.flatMap(q => q.tags.map(tag => subtopicKey(q.subject, tag))));
+    return unique(saved).filter(key => valid.has(key));
+  }
+  function setDashboardSelections(subjects, subtopics = []) {
+    state.settings = state.settings || { language: 'en' };
+    state.settings.selectedSubjects = unique(subjects);
+    state.settings.selectedSubtopics = unique(subtopics);
+    saveState();
+  }
+  function setSelectedSubjects(subjects) { setDashboardSelections(subjects, []); }
+  function getDashboardSelectedQuestionIds() {
+    const subjects = new Set(getSelectedSubjects());
+    const subtopics = getSelectedSubtopics().map(parseSubtopicKey).filter(Boolean);
+    const ids = new Set();
+    state.questions.forEach(q => {
+      if (subjects.has(q.subject) || subtopics.some(item => item.subject === q.subject && q.tags.includes(item.tag))) ids.add(q.id);
+    });
+    return [...ids];
+  }
+
+  function subjectStats(subject) {
+    const questions = state.questions.filter(q => q.subject === subject);
+    const qids = new Set(questions.map(q => q.id));
+    const rows = state.answers.filter(a => qids.has(a.questionId));
+    const lastByQuestion = new Map();
+    rows.forEach(a => lastByQuestion.set(a.questionId, a));
+    const attempted = lastByQuestion.size;
+    const latestCorrect = [...lastByQuestion.values()].filter(a => a.isCorrect).length;
+    const latestWrong = attempted - latestCorrect;
+    const accuracy = rows.length ? Math.round(rows.filter(a => a.isCorrect).length / rows.length * 100) : null;
+    return { questions, rows, attempted, latestCorrect, latestWrong, accuracy };
+  }
+
+  function startDashboardQuiz() {
+    const questionIds = getDashboardSelectedQuestionIds();
+    if (!questionIds.length) { toast('Select at least one subject or subtopic.'); return; }
+    const mode = $('dashboardQuizMode').value;
+    startQuiz({
+      mode,
+      count: Math.max(1, Math.min(Number($('dashboardQuizCount').value || 20), questionIds.length)),
+      duration: Math.max(1, Number($('dashboardDuration').value || 30)),
+      questionIds,
+      tag: '', source: 'all', shuffleQuestions: true, shuffleOptions: false
+    });
+  }
+  function startQuickPractice() {
+    const questionIds = getDashboardSelectedQuestionIds();
+    if (!questionIds.length) { toast('Select at least one subject or subtopic.'); return; }
+    startQuiz({ mode:'practice', count:Math.min(10,questionIds.length), duration:20, questionIds, tag:'', source:'all', shuffleQuestions:true, shuffleOptions:false });
+  }
+
+  function localDateKey(value) {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  function dayStart(date) { return new Date(date.getFullYear(), date.getMonth(), date.getDate()); }
+  function addDays(date, days) { const copy=new Date(date); copy.setDate(copy.getDate()+days); return copy; }
+  function homeHeatmap(kind) {
+    const today = dayStart(new Date());
+    const end = addDays(today, 7 - ((today.getDay()+6)%7) - 1);
+    const start = addDays(end, -(16*7-1));
+    const daily = new Map();
+    state.answers.forEach(answer => {
+      const key=localDateKey(answer.answeredAt);
+      if(!key)return;
+      const row=daily.get(key)||{count:0,correct:0};
+      row.count++; if(answer.isCorrect)row.correct++; daily.set(key,row);
+    });
+    const counts=[...daily.values()].map(v=>v.count);
+    const max=Math.max(1,...counts);
+    let cells='';
+    for(let i=0;i<112;i++){
+      const date=addDays(start,i), key=localDateKey(date), row=daily.get(key)||{count:0,correct:0};
+      let level=0;
+      if(kind==='activity' && row.count){ level=Math.min(4,Math.max(1,Math.ceil(row.count/max*4))); }
+      if(kind==='accuracy' && row.count){ const pct=row.correct/row.count; level=pct>=.8?4:pct>=.6?3:pct>=.4?2:1; }
+      const detail=kind==='activity'?`${row.count} question${row.count===1?'':'s'}`:`${row.count?Math.round(row.correct/row.count*100):0}% accuracy (${row.count} answered)`;
+      cells+=`<span class="heat-cell ${kind}-${level}" title="${escapeHtml(date.toLocaleDateString())}: ${escapeHtml(detail)}"></span>`;
+    }
+    return `<div class="heatmap-with-labels"><div class="heatmap-day-labels"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="heatmap-grid">${cells}</div></div>`;
+  }
+  function activeDayStreak() {
+    const active=new Set(state.answers.map(a=>localDateKey(a.answeredAt)).filter(Boolean));
+    if(!active.size)return 0;
+    let cursor=dayStart(new Date());
+    if(!active.has(localDateKey(cursor))) cursor=addDays(cursor,-1);
+    let streak=0;
+    while(active.has(localDateKey(cursor))){streak++;cursor=addDays(cursor,-1);}
+    return streak;
+  }
+  function homeSessionLabel(session) {
+    if(!session)return 'No completed session yet';
+    const questions=session.questionIds.map(getQuestionById).filter(Boolean);
+    const subjects=unique(questions.map(q=>q.subject));
+    return subjects.length?subjects.slice(0,3).join(' · '):'Mixed subjects';
+  }
+  function repeatHomeLatestSession() {
+    const session=[...state.sessions].sort((a,b)=>new Date(b.finishedAt)-new Date(a.finishedAt))[0];
+    if(!session){showView('dashboard');return;}
+    const questionIds=session.questionIds.filter(id=>getQuestionById(id));
+    if(!questionIds.length){showView('dashboard');return;}
+    startQuiz({mode:session.mode||'practice',count:questionIds.length,duration:session.config?.duration||30,questionIds,tag:'',source:'all',shuffleQuestions:true,shuffleOptions:false});
+  }
+  function performHomeSearch() {
+    const value=$('homeSearchInput').value.trim();
+    $('questionSearch').value=value;
+    showView('questions');
+    renderQuestions();
+    setTimeout(()=>$('questionSearch').focus(),0);
+  }
+  function renderHome() {
+    $('homeActivityHeatmap').innerHTML=homeHeatmap('activity');
+    $('homeAccuracyHeatmap').innerHTML=homeHeatmap('accuracy');
+    const todayKey=localDateKey(new Date());
+    const todayAnswers=state.answers.filter(a=>localDateKey(a.answeredAt)===todayKey);
+    const activeDays=new Set(state.answers.map(a=>localDateKey(a.answeredAt)).filter(Boolean));
+    const streak=activeDayStreak();
+    const dailyAvg=activeDays.size?Math.round(state.answers.length/activeDays.size*10)/10:0;
+    $('homeTodayCount').textContent=`${todayAnswers.length} today`;
+    $('homeStreak').textContent=`${streak} day${streak===1?'':'s'} streak`;
+    $('homeDailyAverage').textContent=`${dailyAvg} daily average`;
+    const recentSessions=[...state.sessions].sort((a,b)=>new Date(b.finishedAt)-new Date(a.finishedAt)).slice(0,3);
+    $('homeRecentTrend').textContent=recentSessions.length?recentSessions.map(s=>`${s.totalCount?Math.round(s.correctCount/s.totalCount*100):0}%`).reverse().join(' → '):'No recent scores';
+    $('homeExamDate').value=state.settings?.examDate||'';
+
+    const total=state.answers.length, correct=state.answers.filter(a=>a.isCorrect).length, wrong=total-correct;
+    $('homeQuestionGood').style.width=`${total?correct/total*100:0}%`;
+    $('homeQuestionBad').style.width=`${total?wrong/total*100:0}%`;
+    const latest=[...state.sessions].sort((a,b)=>new Date(b.finishedAt)-new Date(a.finishedAt))[0];
+    if(latest){
+      const score=latest.totalCount?Math.round(latest.correctCount/latest.totalCount*100):0;
+      $('homeQuestionCard').innerHTML=`<div class="home-card-row"><div><div class="home-card-kicker">${latest.mode==='exam'?'Timed test':'Standard practice'}</div><div class="home-card-title">${escapeHtml(homeSessionLabel(latest))}</div><span class="chip">${score}% · ${latest.answeredCount}/${latest.totalCount} answered</span><div class="home-card-meta">${escapeHtml(new Date(latest.finishedAt).toLocaleString())}</div></div><button id="homeContinueBtn" class="btn btn-primary" type="button">Continue questions ›</button></div>`;
+      $('homeContinueBtn').onclick=repeatHomeLatestSession;
+    } else {
+      $('homeQuestionCard').innerHTML=`<div class="home-card-row"><div><div class="home-card-kicker">Ready to begin</div><div class="home-card-title">${state.questions.length.toLocaleString()} questions available locally</div><p class="home-empty-note">Choose a subject and create your first practice session.</p></div><button id="homeContinueBtn" class="btn btn-primary" type="button">Start questions ›</button></div>`;
+      $('homeContinueBtn').onclick=()=>showView(state.questions.length?'dashboard':'import');
+    }
+    $('homeAnsweredMetric').textContent=total.toLocaleString();
+    $('homeAccuracyMetric').textContent=total?`${Math.round(correct/total*100)}%`:'—';
+    $('homeTimeMetric').textContent=total?formatSeconds(state.answers.reduce((s,a)=>s+(Number(a.elapsedSeconds)||0),0)/total):'—';
+    const subjectRows=new Map();
+    state.answers.forEach(a=>{const q=getQuestionById(a.questionId);if(!q)return;const row=subjectRows.get(q.subject)||{all:0,correct:0};row.all++;if(a.isCorrect)row.correct++;subjectRows.set(q.subject,row);});
+    const weakest=[...subjectRows.entries()].filter(([,v])=>v.all>=2).sort((a,b)=>a[1].correct/a[1].all-b[1].correct/b[1].all)[0];
+    $('homeWeakestSubject').textContent=weakest?`Focus area: ${weakest[0]} (${Math.round(weakest[1].correct/weakest[1].all*100)}% across ${weakest[1].all} answers).`:'Answer some questions to see subject insights.';
+    $('homeWrongCount').textContent=state.questions.filter(q=>(state.wrongCounts[q.id]||0)>0).length;
+    $('homeBookmarkCount').textContent=state.bookmarks.length;
+  }
+
+  function allSubjects() { return unique(state.questions.map(q => q.subject)).sort(); }
+  function tagsForSubject(subject) { return unique(state.questions.filter(q => q.subject === subject).flatMap(q => q.tags)).sort(); }
+  function updateSubjectSelectionAfterRename(oldSubject, newSubject) {
+    state.settings = state.settings || {};
+    if (Array.isArray(state.settings.selectedSubjects)) {
+      state.settings.selectedSubjects = unique(state.settings.selectedSubjects.map(s => s === oldSubject ? newSubject : s));
+    }
+    if (Array.isArray(state.settings.selectedSubtopics)) {
+      state.settings.selectedSubtopics = unique(state.settings.selectedSubtopics.map(key => {
+        const item = parseSubtopicKey(key);
+        return item && item.subject === oldSubject ? subtopicKey(newSubject, item.tag) : key;
+      }));
+    }
+    if (expandedSubjects.delete(oldSubject)) expandedSubjects.add(newSubject);
+  }
+  function updateSubtopicSelectionAfterRename(subject, oldTag, newTag, destinationSubject = subject) {
+    state.settings = state.settings || {};
+    if (!Array.isArray(state.settings.selectedSubtopics)) return;
+    state.settings.selectedSubtopics = unique(state.settings.selectedSubtopics.map(key => {
+      const item = parseSubtopicKey(key);
+      return item && item.subject === subject && item.tag === oldTag ? subtopicKey(destinationSubject, newTag) : key;
+    }));
+  }
+  function populateSubjectManager(preferredSubject = '', preferredTag = '') {
+    const subjects = allSubjects();
+    const current = subjects.includes(preferredSubject) ? preferredSubject : (subjects.includes($('manageSubjectSelect')?.value) ? $('manageSubjectSelect').value : subjects[0] || '');
+    const options = subjects.length ? subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('') : '<option value="">No subjects</option>';
+    $('manageSubjectSelect').innerHTML = options;
+    $('manageSubtopicSubject').innerHTML = options;
+    $('manageSubjectSelect').value = current;
+    $('manageSubtopicSubject').value = current;
+    $('manageSubjectName').value = current;
+    updateSubjectManagerCounts();
+    updateSubjectManagerSubtopics(preferredTag);
+  }
+  function updateSubjectManagerCounts() {
+    const subject = $('manageSubjectSelect').value;
+    const questions = state.questions.filter(q => q.subject === subject);
+    const tags = unique(questions.flatMap(q => q.tags));
+    $('manageSubjectCounts').innerHTML = subject ? `<span class="chip">${questions.length} questions</span><span class="chip">${tags.length} subtopics</span>` : '';
+  }
+  function updateSubjectManagerSubtopics(preferredTag = '') {
+    const subject = $('manageSubtopicSubject').value;
+    const tags = tagsForSubject(subject);
+    $('manageSubtopicSelect').innerHTML = tags.length ? tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('') : '<option value="">No subtopics</option>';
+    if (tags.includes(preferredTag)) $('manageSubtopicSelect').value = preferredTag;
+    $('manageSubtopicName').value = $('manageSubtopicSelect').value || '';
+    $('manageMoveSubject').value = subject || '';
+  }
+  function openSubjectManager(subject = '', tag = '') {
+    subjectManagerPreferredSubject = subject;
+    populateSubjectManager(subject, tag);
+    $('subjectManagerModal').classList.remove('hidden');
+  }
+  function closeSubjectManager() { $('subjectManagerModal').classList.add('hidden'); }
+  function renameOrMergeSubject() {
+    const oldSubject = $('manageSubjectSelect').value;
+    const newSubject = $('manageSubjectName').value.trim();
+    if (!oldSubject || !newSubject) { alert('Choose a subject and enter a new name.'); return; }
+    if (oldSubject === newSubject) { toast('The subject name is unchanged'); return; }
+    const count = state.questions.filter(q => q.subject === oldSubject).length;
+    state.questions.forEach(q => { if (q.subject === oldSubject) q.subject = newSubject; });
+    updateSubjectSelectionAfterRename(oldSubject, newSubject);
+    subjectManagerPreferredSubject = newSubject;
+    saveState();
+    populateSubjectManager(newSubject);
+    toast(`${count} questions moved to ${newSubject}`);
+  }
+  function renameSubtopic() {
+    const subject = $('manageSubtopicSubject').value;
+    const oldTag = $('manageSubtopicSelect').value;
+    const newTag = $('manageSubtopicName').value.trim();
+    if (!subject || !oldTag || !newTag) { alert('Choose a subject and subtopic, then enter a new name.'); return; }
+    if (oldTag === newTag) { toast('The subtopic name is unchanged'); return; }
+    let count = 0;
+    state.questions.forEach(q => {
+      if (q.subject !== subject || !q.tags.includes(oldTag)) return;
+      q.tags = unique(q.tags.map(tag => tag === oldTag ? newTag : tag));
+      count++;
+    });
+    updateSubtopicSelectionAfterRename(subject, oldTag, newTag);
+    saveState();
+    populateSubjectManager(subject, newTag);
+    toast(`${count} questions updated`);
+  }
+  function moveSubtopicQuestions() {
+    const sourceSubject = $('manageSubtopicSubject').value;
+    const tag = $('manageSubtopicSelect').value;
+    const destination = $('manageMoveSubject').value.trim();
+    if (!sourceSubject || !tag || !destination) { alert('Choose a subtopic and enter a destination subject.'); return; }
+    if (sourceSubject === destination) { toast('Those questions are already in this subject'); return; }
+    let count = 0;
+    state.questions.forEach(q => {
+      if (q.subject === sourceSubject && q.tags.includes(tag)) { q.subject = destination; count++; }
+    });
+    updateSubtopicSelectionAfterRename(sourceSubject, tag, tag, destination);
+    saveState();
+    populateSubjectManager(destination, tag);
+    toast(`${count} questions moved to ${destination}`);
+  }
+
+  function renderDashboard() {
+    const totalAnswers = state.answers.length;
+    const correct = state.answers.filter(a => a.isCorrect).length;
+    const wrong = totalAnswers - correct;
+    const score = totalAnswers ? Math.round(correct / totalAnswers * 1000) / 10 : 0;
+    $('overallCorrectBar').style.width = `${totalAnswers ? correct / totalAnswers * 100 : 0}%`;
+    $('overallWrongBar').style.width = `${totalAnswers ? wrong / totalAnswers * 100 : 0}%`;
+    $('overallSummary').innerHTML = totalAnswers
+      ? `You've answered <strong>${totalAnswers}</strong> questions with an average score of <strong>${score}%</strong>.`
+      : `You have <strong>${state.questions.length}</strong> questions available. Import a bank or choose a subject to begin.`;
+
+    const subjects = allSubjects();
+    const subjectQuery = ($('subjectFilter')?.value || '').trim().toLowerCase();
+    const visibleSubjects = subjects.filter(subject => !subjectQuery || subject.toLowerCase().includes(subjectQuery) || tagsForSubject(subject).some(tag => tag.toLowerCase().includes(subjectQuery)));
+    const selected = new Set(getSelectedSubjects());
+    const selectedSubtopics = new Set(getSelectedSubtopics());
+    const selectedQuestionIds = getDashboardSelectedQuestionIds();
+    const selectedCount = selectedQuestionIds.length;
+    $('questionsFound').textContent = `${selectedCount.toLocaleString()} question${selectedCount === 1 ? '' : 's'} found`;
+    $('dashboardQuizCount').max = Math.max(1, selectedCount);
+
+    if (!subjects.length) {
+      $('subjectCategoryList').innerHTML = `<div class="empty-compact">No subjects yet.<br><button class="btn btn-primary" data-open-import style="margin-top:12px">Import questions</button></div>`;
+      const openImport = document.querySelector('[data-open-import]'); if (openImport) openImport.onclick = () => showView('import');
+    } else {
+      const totalStats = { attempted: new Set(state.answers.map(a => a.questionId)).size };
+      let html = `<div class="category-row all-row">
+        <input id="selectAllSubjects" class="category-check" type="checkbox" ${selected.size === subjects.length && selectedSubtopics.size === 0 ? 'checked' : ''}>
+        <div class="category-name"><span>All subjects</span></div>
+        <div class="subject-progress"><div class="subject-progress-track"></div><span class="subject-progress-label">Attempted ${totalStats.attempted} of ${state.questions.length}</span></div>
+        <span class="category-count">${state.questions.length.toLocaleString()}</span>
+      </div>`;
+      visibleSubjects.forEach((subject) => {
+        const subjectIndex = subjects.indexOf(subject);
+        const stats = subjectStats(subject);
+        const total = stats.questions.length || 1;
+        const goodPct = stats.latestCorrect / total * 100;
+        const badPct = stats.latestWrong / total * 100;
+        const tags = unique(stats.questions.flatMap(q => q.tags)).sort();
+        html += `<div class="category-row">
+          <input class="category-check subject-checkbox" type="checkbox" data-subject="${escapeHtml(subject)}" ${selected.has(subject) ? 'checked' : ''}>
+          <div class="category-name"><span>${escapeHtml(subject)}</span>${tags.length ? `<button class="expand-subject" data-expand-subject="${escapeHtml(subject)}" title="Show chapters">${expandedSubjects.has(subject) ? '−' : '+'}</button>` : ''}</div>
+          <div class="subject-progress"><div class="subject-progress-track"><span class="good" style="width:${goodPct}%"></span><span class="bad" style="width:${badPct}%"></span></div><span class="subject-progress-label">Attempted ${stats.attempted} of ${stats.questions.length}</span></div>
+          <span class="category-count">${stats.accuracy === null ? '—' : stats.accuracy + '%'}</span>
+        </div>`;
+        if (expandedSubjects.has(subject) && tags.length) {
+          html += `<div class="tag-subrows">${tags.map((tag, tagIndex) => {
+            const tagQuestions = stats.questions.filter(q => q.tags.includes(tag));
+            const ids = new Set(tagQuestions.map(q => q.id));
+            const attempted = new Set(state.answers.filter(a => ids.has(a.questionId)).map(a => a.questionId)).size;
+            const key = subtopicKey(subject, tag);
+            const inputId = `subtopic-${subjectIndex}-${tagIndex}`;
+            return `<div class="tag-row"><input id="${inputId}" class="tag-checkbox" type="checkbox" data-subject="${escapeHtml(subject)}" data-tag="${escapeHtml(tag)}" ${selectedSubtopics.has(key) ? 'checked' : ''}><label for="${inputId}">${escapeHtml(tag)}</label><span>${attempted} / ${tagQuestions.length}</span></div>`;
+          }).join('')}</div>`;
+        }
+      });
+      if (!visibleSubjects.length) html += `<div class="empty-compact">No subjects or subtopics match “${escapeHtml(subjectQuery)}”.</div>`;
+      $('subjectCategoryList').innerHTML = html;
+      const allBox = $('selectAllSubjects');
+      allBox.indeterminate = !(selected.size === subjects.length && selectedSubtopics.size === 0) && (selected.size > 0 || selectedSubtopics.size > 0);
+      allBox.onchange = e => setDashboardSelections(e.target.checked ? subjects : [], []);
+      document.querySelectorAll('.subject-checkbox').forEach(box => {
+        const subject = box.dataset.subject;
+        const hasPartial = [...selectedSubtopics].some(key => parseSubtopicKey(key)?.subject === subject);
+        box.indeterminate = !box.checked && hasPartial;
+        box.onchange = () => {
+          const nextSubjects = new Set(getSelectedSubjects());
+          let nextSubtopics = getSelectedSubtopics().filter(key => parseSubtopicKey(key)?.subject !== subject);
+          if (box.checked) nextSubjects.add(subject); else nextSubjects.delete(subject);
+          setDashboardSelections([...nextSubjects], nextSubtopics);
+        };
+      });
+      document.querySelectorAll('.tag-checkbox').forEach(box => box.onchange = () => {
+        const subject = box.dataset.subject, tag = box.dataset.tag, key = subtopicKey(subject, tag);
+        const nextSubjects = new Set(getSelectedSubjects());
+        const nextSubtopics = new Set(getSelectedSubtopics());
+        nextSubjects.delete(subject);
+        if (box.checked) nextSubtopics.add(key); else nextSubtopics.delete(key);
+        setDashboardSelections([...nextSubjects], [...nextSubtopics]);
+      });
+      document.querySelectorAll('[data-expand-subject]').forEach(btn => btn.onclick = () => {
+        const subject = btn.dataset.expandSubject;
+        if (expandedSubjects.has(subject)) expandedSubjects.delete(subject); else expandedSubjects.add(subject);
+        renderDashboard();
+      });
+    }
+
+    const sessions = [...state.sessions].sort((a,b) => new Date(b.finishedAt) - new Date(a.finishedAt)).slice(0,6);
+    $('recentSessions').innerHTML = sessions.length ? sessions.map(session => {
+      const questions = session.questionIds.map(getQuestionById).filter(Boolean);
+      const sessionSubjects = unique(questions.map(q => q.subject));
+      const title = sessionSubjects.length ? sessionSubjects.join(' · ') : 'Mixed subjects';
+      const score = session.totalCount ? Math.round(session.correctCount / session.totalCount * 100) : 0;
+      const date = new Date(session.finishedAt);
+      return `<div class="recent-session">
+        <div class="recent-kicker">${session.mode === 'exam' ? 'Timed test' : 'Standard practice'}</div>
+        <div class="recent-title">${escapeHtml(title)}</div>
+        <div class="recent-meta"><span>${date.toLocaleDateString()} · ${session.answeredCount}/${session.totalCount} answered</span><span class="recent-score">${score}%</span></div>
+        <div class="item-actions"><button class="btn btn-secondary" data-repeat-session="${escapeHtml(session.id)}">Repeat ›</button></div>
+      </div>`;
+    }).join('') : `<div class="empty-compact">Your completed sessions will appear here.</div>`;
+    document.querySelectorAll('[data-repeat-session]').forEach(btn => btn.onclick = () => {
+      const session = state.sessions.find(s => s.id === btn.dataset.repeatSession);
+      if (!session) return;
+      const subjects = unique(session.questionIds.map(getQuestionById).filter(Boolean).map(q => q.subject));
+      startQuiz({ mode: session.mode || 'practice', count: session.totalCount || 10, duration: session.config?.duration || 30, subjects, tag:'', source:'all', shuffleQuestions:true, shuffleOptions:false });
+    });
+  }
+
+  function analyticsRow(label, rows) {
+    if (!rows.length) return '';
+    const accuracy = Math.round(rows.filter(a => a.isCorrect).length / rows.length * 100);
+    const avg = rows.reduce((s, a) => s + a.elapsedSeconds, 0) / rows.length;
+    return `<div class="analytics-row"><strong>${escapeHtml(label)}</strong><div class="bar"><span style="width:${accuracy}%"></span></div><span>${accuracy}% · ${formatSeconds(avg)}</span></div>`;
+  }
+
+  function renderFilters() {
+    const subjects = unique(state.questions.map(q => q.subject)).sort();
+    const tags = unique(state.questions.flatMap(q => q.tags)).sort();
+    const currentSubject = $('quizSubject').value;
+    const currentTag = $('quizTag').value;
+    $('quizSubject').innerHTML = '<option value="">All Subjects</option>' + subjects.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    $('quizTag').innerHTML = '<option value="">All Tags</option>' + tags.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    if (subjects.includes(currentSubject)) $('quizSubject').value = currentSubject;
+    if (tags.includes(currentTag)) $('quizTag').value = currentTag;
+    $('quizCount').max = Math.max(1, state.questions.length);
+  }
+
+  function renderReview() {
+    let list = [...state.questions];
+    if (activeReviewFilter === 'wrong') list = list.filter(q => (state.wrongCounts[q.id] || 0) > 0).sort((a,b) => (state.wrongCounts[b.id] || 0) - (state.wrongCounts[a.id] || 0));
+    if (activeReviewFilter === 'bookmarked') list = list.filter(q => state.bookmarks.includes(q.id));
+    if (activeReviewFilter === 'all') list = list.filter(q => state.bookmarks.includes(q.id) || (state.wrongCounts[q.id] || 0) > 0);
+    $('reviewList').className = list.length ? 'stack-list' : 'stack-list empty-state';
+    $('reviewList').innerHTML = list.map(q => {
+      const stats = getQuestionStats(q.id);
+      return `<div class="list-item">
+        <h4>${escapeHtml(q.question)}</h4>
+        <p><strong>Answer:</strong> ${escapeHtml(q.answer.join(', '))} &nbsp; <strong>Explanation:</strong> ${escapeHtml(q.explanation || 'None')}</p>
+        <div class="item-meta"><span class="chip">${escapeHtml(q.subject)}</span>${q.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('')}<span class="chip badge-danger">Wrong: ${stats.wrong}</span><span class="chip badge-success">Correct: ${stats.correct}</span></div>
+        <div class="item-actions">
+          <button class="btn btn-secondary" data-review-one="${escapeHtml(q.id)}">Practice This Question</button>
+          <button class="btn btn-ghost" data-bookmark="${escapeHtml(q.id)}">${state.bookmarks.includes(q.id) ? 'Remove Bookmark' : 'Add Bookmark'}</button>
+          ${stats.wrong ? `<button class="btn btn-ghost" data-clear-wrong="${escapeHtml(q.id)}">Clear Wrong-Question Flag</button>` : ''}
+        </div>
+      </div>`;
+    }).join('') || 'No items yet';
+    document.querySelectorAll('[data-review-one]').forEach(btn => btn.onclick = () => startSingleQuestion(btn.dataset.reviewOne));
+    document.querySelectorAll('[data-bookmark]').forEach(btn => btn.onclick = () => toggleBookmark(btn.dataset.bookmark));
+    document.querySelectorAll('[data-clear-wrong]').forEach(btn => btn.onclick = () => {
+      delete state.wrongCounts[btn.dataset.clearWrong]; saveState(); toast('Wrong-question flag cleared');
+    });
+  }
+
+  function startSingleQuestion(questionId) {
+    const q = getQuestionById(questionId);
+    if (!q) return;
+    currentQuiz = {
+      id: uid('session'), mode: 'practice', config: { mode: 'practice' }, questions: [clone(q)], currentIndex: 0,
+      answers: [], selected: [], submitted: false, startedAt: Date.now(), questionStartedAt: Date.now(), totalSeconds: null, finished: false
+    };
+    showView('quiz'); renderQuizQuestion(); startTimer();
+  }
+
+  function renderQuestions() {
+    const query = $('questionSearch').value.trim().toLowerCase();
+    const filtered = state.questions.filter(q => [q.id, q.question, q.subject, ...q.tags].join(' ').toLowerCase().includes(query));
+    $('questionCountLabel').textContent = `${filtered.length} / ${state.questions.length} questions`;
+    $('questionList').className = filtered.length ? 'stack-list' : 'stack-list empty-state';
+    $('questionList').innerHTML = filtered.map(q => `<div class="list-item">
+      <h4>${escapeHtml(q.id)} · ${escapeHtml(q.question)}</h4>
+      <p><strong>Answer:</strong> ${escapeHtml(q.answer.join(', '))} &nbsp; <strong>Explanation:</strong> ${escapeHtml(q.explanation || 'None')}</p>
+      ${q.image ? `<img class="media-thumb" src="${escapeHtml(safeImageSrc(q.image.src))}" alt="${escapeHtml(q.image.alt || '')}">` : ''}
+      <div class="item-meta"><span class="chip">${escapeHtml(q.subject)}</span>${q.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('')}${q.image ? '<span class="media-badge">▧ Image</span>' : ''}${q.chart ? '<span class="media-badge">⌁ Chart</span>' : ''}${q.explanationImage ? '<span class="media-badge">▧ Explanation image</span>' : ''}</div>
+      <div class="item-actions"><button class="btn btn-secondary" data-edit-question="${escapeHtml(q.id)}">Edit</button><button class="btn btn-danger" data-delete-question="${escapeHtml(q.id)}">Delete</button></div>
+    </div>`).join('') || 'No questions yet';
+    document.querySelectorAll('[data-edit-question]').forEach(btn => btn.onclick = () => openQuestionEditor(btn.dataset.editQuestion));
+    document.querySelectorAll('[data-delete-question]').forEach(btn => btn.onclick = () => deleteQuestion(btn.dataset.deleteQuestion));
+  }
+
+  function setEditorImage(kind, image) {
+    if (kind === 'question') editorQuestionImage = image; else editorExplanationImage = image;
+    const preview = $(kind === 'question' ? 'editQuestionImagePreview' : 'editExplanationImagePreview');
+    if (image?.src) { preview.src = image.src; preview.classList.add('has-image'); }
+    else { preview.removeAttribute('src'); preview.classList.remove('has-image'); }
+  }
+  function readImageAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read the image file.'));
+      reader.onload = () => {
+        const dataUrl = String(reader.result || '');
+        if (file.type === 'image/svg+xml') { resolve(dataUrl); return; }
+        const img = new Image();
+        img.onerror = () => reject(new Error('The selected file is not a readable image.'));
+        img.onload = () => {
+          const maxDimension = 1400;
+          const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale)); canvas.height = Math.max(1, Math.round(img.height * scale));
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/webp', .88));
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function currentEditorChart() {
+    const type = $('editChartType').value;
+    if (!type) return null;
+    return normalizeChart({ type, title:$('editChartTitle').value.trim(), labels:splitList($('editChartLabels').value), values:splitList($('editChartValues').value), xLabel:$('editChartXLabel').value.trim(), yLabel:$('editChartYLabel').value.trim() });
+  }
+  function updateEditorChartPreview() {
+    const chart = currentEditorChart();
+    $('editChartPreview').innerHTML = chart ? renderChartSvg(chart) : '';
+  }
+  function openQuestionEditor(id = null) {
+    editingQuestionId = id;
+    const q = id ? getQuestionById(id) : null;
+    $('questionEditorTitle').textContent = q ? 'Edit Question' : 'Add Question';
+    $('editQuestionId').value = q?.id || `Q-${Date.now()}`;
+    $('editQuestionId').disabled = !!q;
+    $('editSubject').value = q?.subject || '';
+    $('editTags').value = q?.tags?.join(', ') || '';
+    $('editQuestionText').value = q?.question || '';
+    ['A','B','C','D','E','F'].forEach(key => $(`editOption${key}`).value = q?.options?.[key] || '');
+    $('editAnswers').value = q?.answer?.join(',') || '';
+    $('editExplanation').value = q?.explanation || '';
+    $('editReferences').value = q?.references?.join(' | ') || '';
+    setEditorImage('question', q?.image ? clone(q.image) : null);
+    setEditorImage('explanation', q?.explanationImage ? clone(q.explanationImage) : null);
+    $('editQuestionImageAlt').value = q?.image?.alt || '';
+    $('editQuestionImageCaption').value = q?.image?.caption || '';
+    $('editExplanationImageAlt').value = q?.explanationImage?.alt || '';
+    $('editExplanationImageCaption').value = q?.explanationImage?.caption || '';
+    $('editChartType').value = q?.chart?.type || '';
+    $('editChartTitle').value = q?.chart?.title || '';
+    $('editChartLabels').value = q?.chart?.labels?.join(', ') || '';
+    $('editChartValues').value = q?.chart?.values?.join(', ') || '';
+    $('editChartXLabel').value = q?.chart?.xLabel || '';
+    $('editChartYLabel').value = q?.chart?.yLabel || '';
+    updateEditorChartPreview();
+    $('questionEditorModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeQuestionEditor() {
+    $('questionEditorModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    editingQuestionId = null;
+  }
+  function saveQuestionEditor(event) {
+    event.preventDefault();
+    const options = {};
+    ['A','B','C','D','E','F'].forEach(key => { const value=$(`editOption${key}`).value.trim(); if(value) options[key]=value; });
+    const answer = splitList($('editAnswers').value).map(v=>v.toUpperCase());
+    const question = normalizeQuestion({
+      id:$('editQuestionId').value.trim(), subject:$('editSubject').value.trim(), tags:splitList($('editTags').value), question:$('editQuestionText').value.trim(), options, answer,
+      explanation:$('editExplanation').value.trim(), references:String($('editReferences').value||'').split('|').map(v=>v.trim()).filter(Boolean),
+      image: editorQuestionImage ? {...editorQuestionImage, alt:$('editQuestionImageAlt').value.trim(), caption:$('editQuestionImageCaption').value.trim()} : null,
+      explanationImage: editorExplanationImage ? {...editorExplanationImage, alt:$('editExplanationImageAlt').value.trim(), caption:$('editExplanationImageCaption').value.trim()} : null,
+      chart: currentEditorChart(), createdAt: editingQuestionId ? getQuestionById(editingQuestionId)?.createdAt : new Date().toISOString()
+    });
+    const errors = validateQuestion(question, 0);
+    if (errors.length) { alert(errors.join('\n')); return; }
+    if (!editingQuestionId && state.questions.some(q=>q.id===question.id)) { alert('A question with this ID already exists.'); return; }
+    if ($('editChartType').value && !question.chart) { alert('The chart needs matching comma-separated labels and numeric values.'); return; }
+    const wasEditing = !!editingQuestionId;
+    if (editingQuestionId) state.questions = state.questions.map(q=>q.id===editingQuestionId?question:q); else state.questions.push(question);
+    if (saveState()) { closeQuestionEditor(); toast(wasEditing ? 'Question updated' : 'Question added'); }
+  }
+
+  function deleteQuestion(id) {
+    if (!confirmAction('Delete this question?')) return;
+    state.questions = state.questions.filter(q => q.id !== id);
+    state.answers = state.answers.filter(a => a.questionId !== id);
+    state.bookmarks = state.bookmarks.filter(qid => qid !== id);
+    delete state.wrongCounts[id];
+    saveState();
+    toast('Question deleted');
+  }
+
+  function renderAll() {
+    renderProgrammeLabels();
+    applySidebarState();
+    renderHome();
+    renderDashboard();
+    renderFilters();
+    renderReview();
+    renderQuestions();
+    updateStorageStatus();
+  }
+
+  function exportJson(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function bindEvents() {
+    document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => showView(btn.dataset.view)));
+    $('sidebarToggleBtn').onclick = toggleSidebar;
+    $('sidebarReopenBtn').onclick = () => setSidebarCollapsed(false);
+    $('homeSidebarToggleBtn').onclick = toggleSidebar;
+    $('saveProgrammeLabelBtn').onclick = saveProgrammeLabel;
+    $('resetProgrammeLabelBtn').onclick = () => { $('programmeTitleInput').value='Medical student years'; $('programmeSubtitleInput').value='1–3'; saveProgrammeLabel(); };
+    $('homeSearchButton').onclick = performHomeSearch;
+    $('homeSearchInput').onkeydown = e => { if (e.key === 'Enter') performHomeSearch(); };
+    $('homeExamDate').onchange = e => { state.settings=state.settings||{}; state.settings.examDate=e.target.value; saveState(); toast(e.target.value?'Exam date saved':'Exam date cleared'); };
+    $('homeOpenBankBtn').onclick = () => showView('dashboard');
+    $('homeOpenPerformanceBtn').onclick = () => showView('dashboard');
+    $('homeOpenReviewBtn').onclick = () => { activeReviewFilter='wrong'; document.querySelectorAll('[data-review-filter]').forEach(x=>x.classList.toggle('active',x.dataset.reviewFilter==='wrong')); renderReview(); showView('review'); };
+    $('homeWrongBtn').onclick = () => { activeReviewFilter='wrong'; document.querySelectorAll('[data-review-filter]').forEach(x=>x.classList.toggle('active',x.dataset.reviewFilter==='wrong')); renderReview(); showView('review'); };
+    $('homeBookmarkBtn').onclick = () => { activeReviewFilter='bookmarked'; document.querySelectorAll('[data-review-filter]').forEach(x=>x.classList.toggle('active',x.dataset.reviewFilter==='bookmarked')); renderReview(); showView('review'); };
+    $('homeImportBtn').onclick = () => showView('import');
+    $('homeAddQuestionBtn').onclick = () => { showView('questions'); openQuestionEditor(); };
+    $('homeBackupBtn').onclick = () => showView('settings');
+    $('quickStartBtn').onclick = startQuickPractice;
+    $('startSelectedBtn').onclick = startDashboardQuiz;
+    $('dashboardQuizMode').onchange = () => $('dashboardDurationLabel').classList.toggle('hidden', $('dashboardQuizMode').value !== 'exam');
+    $('subjectFilter').oninput = renderDashboard;
+    $('selectAllSubjectBtn').onclick = () => setDashboardSelections(allSubjects(), []);
+    $('clearSubjectBtn').onclick = () => setDashboardSelections([], []);
+    $('expandAllSubjectBtn').onclick = () => { allSubjects().forEach(subject => expandedSubjects.add(subject)); renderDashboard(); };
+    $('collapseAllSubjectBtn').onclick = () => { expandedSubjects.clear(); renderDashboard(); };
+    $('manageSubjectsDashboardBtn').onclick = () => openSubjectManager();
+    $('chooseFileBtn').onclick = () => $('fileInput').click();
+    $('fileInput').onchange = e => e.target.files[0] && handleImportFile(e.target.files[0]);
+    $('dropZone').ondragover = e => { e.preventDefault(); $('dropZone').classList.add('dragover'); };
+    $('dropZone').ondragleave = () => $('dropZone').classList.remove('dragover');
+    $('dropZone').ondrop = e => { e.preventDefault(); $('dropZone').classList.remove('dragover'); if (e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]); };
+    $('loadSampleBtn').onclick = () => { importBuffer = prepareImportQuestions(sampleQuestions.map(normalizeQuestion), {name:'sample_questions.json', id:'built-in-sample-v1'}); showImportPreview(importBuffer); };
+    $('downloadTemplateBtn').onclick = () => exportJson('question-template.json', sampleQuestions.slice(0,1));
+    $('cancelImportBtn').onclick = () => { importBuffer = []; importMeta = { sourceName: '', total: 0, renamed: 0, updates: 0 }; $('importPreviewPanel').classList.add('hidden'); };
+    $('confirmImportBtn').onclick = confirmImport;
+    $('quizMode').onchange = () => $('durationField').classList.toggle('hidden', $('quizMode').value !== 'exam');
+    $('quizSetupForm').onsubmit = e => {
+      e.preventDefault();
+      startQuiz({
+        mode: $('quizMode').value,
+        count: Math.max(1, Number($('quizCount').value || 10)),
+        duration: Math.max(1, Number($('quizDuration').value || 20)),
+        subject: $('quizSubject').value,
+        tag: $('quizTag').value,
+        source: $('quizSource').value,
+        shuffleQuestions: $('shuffleQuestions').checked,
+        shuffleOptions: $('shuffleOptions').checked
+      });
+    };
+    $('submitAnswerBtn').onclick = submitCurrentAnswer;
+    $('previousQuestionBtn').onclick = previousQuestion;
+    $('skipQuestionBtn').onclick = skipQuestion;
+    $('nextQuestionBtn').onclick = nextQuestion;
+    $('quizTextSmallerBtn').onclick = () => { const s=getQuizDisplaySettings(); changeQuizDisplay({quizFontScale:Math.max(.75, Math.round((s.scale-.05)*100)/100)}); };
+    $('quizTextResetBtn').onclick = () => changeQuizDisplay({quizFontScale:.9});
+    $('quizTextLargerBtn').onclick = () => { const s=getQuizDisplaySettings(); changeQuizDisplay({quizFontScale:Math.min(1.25, Math.round((s.scale+.05)*100)/100)}); };
+    $('quizWidthSelect').onchange = e => changeQuizDisplay({quizWidth:e.target.value});
+    $('quizDensityBtn').onclick = () => { const s=getQuizDisplaySettings(); changeQuizDisplay({quizDensity:s.density==='compact'?'comfortable':'compact'}); };
+    $('quizSidebarBtn').onclick = () => { const s=getQuizDisplaySettings(); changeQuizDisplay({quizSidebar:!s.sidebar}); };
+    $('bookmarkCurrentBtn').onclick = () => currentQuiz && toggleBookmark(currentQuiz.questions[currentQuiz.currentIndex].id);
+    $('exitQuizBtn').onclick = () => { if (confirmAction('End the current quiz?')) finishQuiz(false); };
+    $('newQuizBtn').onclick = () => showView('quizSetup');
+    $('reviewSessionBtn').onclick = () => showView('results');
+    document.querySelectorAll('[data-review-filter]').forEach(btn => btn.onclick = () => {
+      activeReviewFilter = btn.dataset.reviewFilter;
+      document.querySelectorAll('[data-review-filter]').forEach(x => x.classList.toggle('active', x === btn));
+      renderReview();
+    });
+    $('questionSearch').oninput = renderQuestions;
+    $('manageSubjectsBtn').onclick = () => openSubjectManager();
+    $('manageSubjectsDashboardBtn').onclick = () => openSubjectManager();
+    $('closeSubjectManagerBtn').onclick = closeSubjectManager;
+    $('doneSubjectManagerBtn').onclick = closeSubjectManager;
+    $('subjectManagerModal').onclick = e => { if (e.target === $('subjectManagerModal')) closeSubjectManager(); };
+    $('manageSubjectSelect').onchange = () => { $('manageSubjectName').value = $('manageSubjectSelect').value; updateSubjectManagerCounts(); };
+    $('manageSubtopicSubject').onchange = () => updateSubjectManagerSubtopics();
+    $('manageSubtopicSelect').onchange = () => { $('manageSubtopicName').value = $('manageSubtopicSelect').value; };
+    $('renameSubjectBtn').onclick = renameOrMergeSubject;
+    $('renameSubtopicBtn').onclick = renameSubtopic;
+    $('moveSubtopicBtn').onclick = moveSubtopicQuestions;
+    $('addQuestionBtn').onclick = () => openQuestionEditor();
+    $('closeQuestionEditorBtn').onclick = closeQuestionEditor;
+    $('cancelQuestionEditorBtn').onclick = closeQuestionEditor;
+    $('questionEditorModal').onclick = e => { if (e.target === $('questionEditorModal')) closeQuestionEditor(); };
+    $('questionEditorForm').onsubmit = saveQuestionEditor;
+    $('editQuestionImageFile').onchange = async e => { const file=e.target.files[0]; if(!file)return; try{ setEditorImage('question',{src:await readImageAsDataUrl(file),alt:'',caption:''}); }catch(err){alert(err.message);} e.target.value=''; };
+    $('editExplanationImageFile').onchange = async e => { const file=e.target.files[0]; if(!file)return; try{ setEditorImage('explanation',{src:await readImageAsDataUrl(file),alt:'',caption:''}); }catch(err){alert(err.message);} e.target.value=''; };
+    $('clearQuestionImageBtn').onclick = () => { setEditorImage('question', null); $('editQuestionImageAlt').value=''; $('editQuestionImageCaption').value=''; };
+    $('clearExplanationImageBtn').onclick = () => { setEditorImage('explanation', null); $('editExplanationImageAlt').value=''; $('editExplanationImageCaption').value=''; };
+    ['editChartType','editChartTitle','editChartLabels','editChartValues','editChartXLabel','editChartYLabel'].forEach(id => $(id).addEventListener('input', updateEditorChartPreview));
+    document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleSidebar(); return; } if (e.key !== 'Escape') return; if (!$('questionEditorModal').classList.contains('hidden')) closeQuestionEditor(); if (!$('subjectManagerModal').classList.contains('hidden')) closeSubjectManager(); });
+    $('deleteAllQuestionsBtn').onclick = () => {
+      if (!state.questions.length) return;
+      if (!confirmAction('Clear all questions and related answer history?')) return;
+      state.questions = []; state.answers = []; state.sessions = []; state.bookmarks = []; state.wrongCounts = {};
+      saveState(); toast('Question bank cleared');
+    };
+    $('createDataFileBtn').onclick = createProjectFile;
+    $('openDataFileBtn').onclick = openProjectFile;
+    $('saveDataFileBtn').onclick = async () => {
+      try { await writeProjectFile(); toast('Project file saved'); }
+      catch (error) { alert(`Could not save the data file: ${error.message}`); }
+    };
+    $('exportBackupBtn').onclick = () => exportJson(`local-quiz-backup-${new Date().toISOString().slice(0,10)}.json`, { app: 'MedQ Local', version: 3, exportedAt: new Date().toISOString(), data: state });
+    $('importBackupBtn').onclick = () => $('backupFileInput').click();
+    $('backupFileInput').onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const data = parsed.data || parsed;
+          if (!Array.isArray(data.questions) || !Array.isArray(data.answers)) throw new Error('This is not a valid backup file');
+          if (!confirmAction('Importing this backup will replace all current data. Continue?')) return;
+          state = { ...clone(defaultState), ...data };
+          saveState(); toast('Backup restored'); showView('home');
+        } catch (err) { alert(`Import failed: ${err.message}`); }
+      };
+      reader.readAsText(file, 'utf-8');
+    };
+    $('resetAllBtn').onclick = () => {
+      if (!confirmAction('Permanently delete all data?')) return;
+      state = clone(defaultState); saveState(); toast('All data has been reset'); showView('home');
+    };
+  }
+
+  bindEvents();
+  applyQuizDisplaySettings();
+  applySidebarState();
+  renderProgrammeLabels();
+  renderAll();
+  showView('home');
+})();
+
+</script>
+</body>
+</html>
